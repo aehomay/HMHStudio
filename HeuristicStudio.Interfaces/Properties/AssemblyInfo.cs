@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("HeuristicStudio")]
+[assembly: AssemblyTitle("HeuristicStudio.Interfaces")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("HeuristicStudio")]
+[assembly: AssemblyProduct("HeuristicStudio.Interfaces")]
 [assembly: AssemblyCopyright("Copyright ©  2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("5b85b178-4c04-433e-9be7-0183e4c7de16")]
+[assembly: Guid("c61751d3-8b95-46f6-baa3-38caaaa7b641")]
 
 // Version information for an assembly consists of the following four values:
 //

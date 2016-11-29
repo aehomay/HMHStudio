@@ -3,7 +3,25 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HeuristicStudio", "HeuristicStudio\HeuristicStudio.csproj", "{5B85B178-4C04-433E-9BE7-0183E4C7DE16}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{3CC378EA-A90F-42D4-8D50-D3A6B90FE7E9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastructure", "{86EE53C0-96C1-4A86-B02C-1C90CAD3C462}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Application", "Application", "{A9B635F2-C0C8-4979-A875-12147C470FD3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HeuristicStudio.Core", "HeuristicStudio.Core\HeuristicStudio.Core.csproj", "{4C6ECD4C-C492-4656-8C3D-7703BE5E2FF6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HeuristicStudio.Infrastructure", "HeuristicStudio.Infrastructure\HeuristicStudio.Infrastructure.csproj", "{51682099-6B38-407B-A277-E262196ADAA2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HeuristicStudio.Windows", "HeuristicStudio.Windows\HeuristicStudio.Windows.csproj", "{E51F719A-75E0-45FD-B77B-69509E8E1053}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HeuristicStudio.Interfaces", "HeuristicStudio.Interfaces\HeuristicStudio.Interfaces.csproj", "{C61751D3-8B95-46F6-BAA3-38CAAAA7B641}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{44CD3E48-C0C1-47B1-9413-4892ED167AF1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Interface", "Interface", "{A86C359F-45FA-4944-9E81-36A3C706EF14}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTest", "UnitTest\UnitTest.csproj", "{3301BF4C-53FE-486C-B904-0AF210159A39}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,12 +29,35 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{5B85B178-4C04-433E-9BE7-0183E4C7DE16}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5B85B178-4C04-433E-9BE7-0183E4C7DE16}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5B85B178-4C04-433E-9BE7-0183E4C7DE16}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5B85B178-4C04-433E-9BE7-0183E4C7DE16}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4C6ECD4C-C492-4656-8C3D-7703BE5E2FF6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C6ECD4C-C492-4656-8C3D-7703BE5E2FF6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4C6ECD4C-C492-4656-8C3D-7703BE5E2FF6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4C6ECD4C-C492-4656-8C3D-7703BE5E2FF6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{51682099-6B38-407B-A277-E262196ADAA2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{51682099-6B38-407B-A277-E262196ADAA2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{51682099-6B38-407B-A277-E262196ADAA2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{51682099-6B38-407B-A277-E262196ADAA2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E51F719A-75E0-45FD-B77B-69509E8E1053}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E51F719A-75E0-45FD-B77B-69509E8E1053}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E51F719A-75E0-45FD-B77B-69509E8E1053}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E51F719A-75E0-45FD-B77B-69509E8E1053}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C61751D3-8B95-46F6-BAA3-38CAAAA7B641}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C61751D3-8B95-46F6-BAA3-38CAAAA7B641}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C61751D3-8B95-46F6-BAA3-38CAAAA7B641}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C61751D3-8B95-46F6-BAA3-38CAAAA7B641}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3301BF4C-53FE-486C-B904-0AF210159A39}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3301BF4C-53FE-486C-B904-0AF210159A39}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3301BF4C-53FE-486C-B904-0AF210159A39}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3301BF4C-53FE-486C-B904-0AF210159A39}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{4C6ECD4C-C492-4656-8C3D-7703BE5E2FF6} = {3CC378EA-A90F-42D4-8D50-D3A6B90FE7E9}
+		{51682099-6B38-407B-A277-E262196ADAA2} = {86EE53C0-96C1-4A86-B02C-1C90CAD3C462}
+		{E51F719A-75E0-45FD-B77B-69509E8E1053} = {A9B635F2-C0C8-4979-A875-12147C470FD3}
+		{C61751D3-8B95-46F6-BAA3-38CAAAA7B641} = {A86C359F-45FA-4944-9E81-36A3C706EF14}
+		{3301BF4C-53FE-486C-B904-0AF210159A39} = {44CD3E48-C0C1-47B1-9413-4892ED167AF1}
 	EndGlobalSection
 EndGlobal

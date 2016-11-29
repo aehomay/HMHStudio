@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace HeuristicStudio.Properties
+namespace HeuristicStudio.Windows.Properties
 {
 
 
