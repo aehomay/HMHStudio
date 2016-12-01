@@ -136,15 +136,18 @@ namespace HeuristicStudio.Core.Model.MetaHeuristic
                 k.Attributes.ForEach(a1 =>
                 {
                     SCPAttribute attribute = _problem.Source.Attributes.Find(a2 => a2.Tag == a1.Tag);
-                    if (attribute.Visit == false)
+                    if (attribute != null)
                     {
-                        coveredatt++;
-                        attribute.UsedIn.ForEach(s1 =>
+                        if (attribute.Visit == false)
                         {
-                            s1.Frequency--;
-                        });
+                            coveredatt++;
+                            attribute.UsedIn.ForEach(s1 =>
+                            {
+                                s1.Frequency--;
+                            });
+                        }
+                        attribute.Visit = true;
                     }
-                    attribute.Visit = true;
                 });
             }
             sp.Stop();

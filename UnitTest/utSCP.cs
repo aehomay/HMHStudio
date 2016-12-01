@@ -13,6 +13,7 @@ using System;
 using System.Diagnostics;
 using HeuristicStudio.Infrastructure.IO.Monitor;
 using HeuristicStudio.Core.Service;
+using System.Threading;
 
 namespace UnitTest
 {
@@ -93,37 +94,44 @@ namespace UnitTest
         private bool SolutionValidity()
         {
             SCP problem = (SCP)scpParser.Problem;
+            HashSet<int> problem_att = new HashSet<int>();
+            problem.Source.Attributes.ForEach(a => problem_att.Add(a.Tag));
 
-            #region Step#1 Exhustive test
-            List<int> attributes = new List<int>();
-            problem.Solution.Sets.ForEach(s => s.Attributes.ForEach(a => attributes.Add(a.Tag)));
-            attributes = attributes.OrderBy(a => a).ToList();
-            for (int i = 1; i < attributes.Count; i++)
-            {
-                if (attributes[i] - attributes[i - 1] > 1)
-                    return false;
-            }
-            #endregion
+            HashSet<int> solution_att = new HashSet<int>();
+            problem.Solution.USet.ForEach(a => solution_att.Add(a.Item2));
 
-            #region Step#2 Formulation test nx(n-1)/2
-            int n = problem.Matrix.Size.X;
-            int sum1 = n * (n + 1) / 2;
+            return (problem_att.IsSubsetOf(solution_att));
 
-            int seed = attributes[0];
-            int sum2 = seed;
-            for (int i = 1; i < attributes.Count; i++)
-            {
-                if (attributes[i] != seed)
-                {
-                    seed = attributes[i];
-                    sum2 += seed;
-                }
-            }
-            if (sum2 != sum1) return false;
-            #endregion
+            //#region Step#1 Exhustive test
+            //List<int> attributes = new List<int>();
+            //problem.Solution.Sets.ForEach(s => s.Attributes.ForEach(a => attributes.Add(a.Tag)));
+            //attributes = attributes.OrderBy(a => a).ToList();
+            //for (int i = 1; i < attributes.Count; i++)
+            //{
+            //    if (attributes[i] - attributes[i - 1] > 1)
+            //        return false;
+            //}
+            //#endregion
+
+            //#region Step#2 Formulation test nx(n-1)/2
+            //int n = problem.Matrix.Size.X;
+            //int sum1 = n * (n + 1) / 2;
+
+            //int seed = attributes[0];
+            //int sum2 = seed;
+            //for (int i = 1; i < attributes.Count; i++)
+            //{
+            //    if (attributes[i] != seed)
+            //    {
+            //        seed = attributes[i];
+            //        sum2 += seed;
+            //    }
+            //}
+            //if (sum2 != sum1) return false;
+            //#endregion
 
 
-            return true;
+            //return true;
         }
 
         private bool IsFeasible(SCPSolution solution, SCP problem)
@@ -555,7 +563,8 @@ namespace UnitTest
             {
                 IOData.ReadFileToMatrix(parser, file);
 
-                IHeuristic h1 = new SCPGRASP(0.9, 1e-9);
+                //IHeuristic h1 = new SCPGRASP(0.9, 1e-9);
+                IHeuristic h1 = new SCPFirstOrderGreedy();
                 double cost = h1.Execute(parser.Problem);
 
                 DestructiveConstructive dc = new DestructiveConstructive();
@@ -563,7 +572,7 @@ namespace UnitTest
                 ((SCP)scpParser.Problem).Solution = dc.OptimumSultion;
                 TimeSpan elapsed = dc.Elapsed;
 
-                Monitoring.Instance.Write("DCGRASP    " + file.Split('\\')[file.Split('\\').Count() - 1] + " " + cost.ToString() + " " + dc.Elapsed.ToString());
+                Monitoring.Instance.Write("DCFOG    " + file.Split('\\')[file.Split('\\').Count() - 1] + " " + cost.ToString() + " " + dc.Elapsed.ToString());
 
 
             });

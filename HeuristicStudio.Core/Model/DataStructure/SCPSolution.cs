@@ -82,6 +82,29 @@ namespace HeuristicStudio.Core.Model.DataStructure
             });
         }
 
+        public void Resetset()
+        {
+            Sets.ForEach(s =>
+            {
+                s.Visit = false;
+                s.Frequency = s.Attributes.Count;
+                s.Attributes.ForEach(a =>
+                {
+                    a.Visit = false;
+                    a.Frequency = 0;
+                    a.Weight = 0;
+                });
+            });
+            Sets.ForEach(s =>
+            {
+                s.Weight = s.Cost / s.Frequency;
+                s.Attributes.ForEach(a =>
+                {
+                    a.Frequency++;
+                });
+            });
+        }
+
         public void RemoveSet(SCPSet set)
         {
             set.Attributes.ForEach(a =>

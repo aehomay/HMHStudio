@@ -121,6 +121,20 @@ namespace HeuristicStudio.Core.Model.DataStructure.SCP
             _weighting = true;
             Sets.ForEach(s =>
             {
+                s.Visit = false;
+                s.Frequency = s.Attributes.Count;
+                s.Weight = (s.Cost / s.Frequency);
+            });
+            Sets = Sets.OrderBy(s => s.Weight).ThenByDescending(s => s.Frequency).ToList();
+        }
+
+        public void Resetset()
+        {
+            _weighting = true;
+            Sets.ForEach(s =>
+            {
+                s.Attributes.ForEach(a => a.Visit = false);
+                s.Visit = false;
                 s.Frequency = s.Attributes.Count;
                 s.Weight = (s.Cost / s.Frequency);
             });

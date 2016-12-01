@@ -1,4 +1,6 @@
 ﻿using HeuristicStudio.Core.Model.DataStructure;
+using HeuristicStudio.Core.Model.DataStructure.SCP;
+using HeuristicStudio.Core.Model.MetaHeuristic;
 using HeuristicStudio.Core.Model.Problems;
 using HeuristicStudio.Core.Service;
 using System;
@@ -11,7 +13,12 @@ using System.Linq;
 
 namespace HeuristicStudio.Core.Model.Heuristic.Constructive
 {
-    enum eState : int
+    public enum Mode
+    {
+        Deterministic,
+        NonDeterministic
+    }
+    public enum eState : int
     {
         Distroy = 0,
         Construct,
@@ -31,6 +38,7 @@ namespace HeuristicStudio.Core.Model.Heuristic.Constructive
     //Based on the first improvment strategy
     public class DestructiveConstructive : IImprovementHeuristic<SCPSolution>, IMetaHeuristic<SCPSolution>
     {
+        Mode _mode = Mode.Deterministic;
         eState _state = eState.Start;
         SCP _problem = null;
         SCPSolution _solution = null;
@@ -39,9 +47,9 @@ namespace HeuristicStudio.Core.Model.Heuristic.Constructive
         List<Tuple<int, double, int>> _losted = new List<Tuple<int, double, int>>();
         List<SCPSet> _cadidate = new List<SCPSet>();
         List<SCPSet> _recovery = new List<SCPSet>();
+        List<Tuple<double, double, List<SCPSet>>> _alpha_recovery = new List<Tuple<double, double, List<SCPSet>>>();
         double _ratio = 10;
         double _delta = 10;
-        double _beta = 1;
         double _epsilon = 0.9;
         double _maxprice = 0.0;
         double _saved = 0.0;
@@ -72,12 +80,19 @@ namespace HeuristicStudio.Core.Model.Heuristic.Constructive
             }
         }
 
+        public double Execute(IProblem problem,Mode mode)
+        {
+            _mode = mode;
+            return Execute(problem);
+        }
+
         public double Execute(IProblem problem)
         {
 
             _sp.Restart();
             Initializer(problem);
 
+            double gain = 0;
             double budget = 0;
             double alpha = 0.0;
             double estimation = 0.0;
@@ -91,11 +106,26 @@ namespace HeuristicStudio.Core.Model.Heuristic.Constructive
                         _recovery = RemoveRedundantSet(_recovery);
                         _recovery.ForEach(s => _solution.Sets.Add(s));
                         _recovery.Clear();
+                        if (_mode == Mode.NonDeterministic)
+                        {
+                            if (_alpha_recovery.Count > 0)
+                            {
+                                Tuple<double, double, List<SCPSet>> best = _alpha_recovery.OrderByDescending(a => a.Item1).ToList().First();
+                                alpha = best.Item2;
+                                _saved = best.Item1;
+                                Destructor(_solution, alpha);
+                                Constructor(new List<SCPSet>(best.Item3));
+                                _alpha_recovery.Clear();
+                            }
+                        }
                         _state = eState.Feasiblity;
                         break;
 
                     case eState.Distroy://------------------------------------Distruction State
-                        double gain = Destructor(_solution);
+                        if (_mode == Mode.NonDeterministic)
+                            gain = Destructor(_solution, alpha);
+                        else if (_mode == Mode.Deterministic)
+                            gain = Destructor(_solution);
                         if (gain > 0)
                         {
                             budget += gain;
@@ -108,7 +138,7 @@ namespace HeuristicStudio.Core.Model.Heuristic.Constructive
                         break;
 
                     case eState.Construct://----------------------------------Construction State
-                        Constructor(new List<DataStructure.SCPSet>(_cadidate));
+                        Constructor(new List<SCPSet>(_cadidate));
                         _state = eState.Feasiblity;
                         break;
 
@@ -129,13 +159,16 @@ namespace HeuristicStudio.Core.Model.Heuristic.Constructive
                         break;
 
                     case eState.Beta://----------------------------------------Beta State
-                        budget += _saved;
-                        _saved = 0;
+                        double rquest = (estimation - budget);
+                        budget += (rquest> _saved)?_saved:rquest;
+                        _saved = Math.Max((_saved - rquest), 0);
                         _state = eState.Delta;
                         break;
 
                     case eState.Council://-------------------------------------Council State
-                        if (estimation > budget)
+                        if (estimation < (budget + _saved))
+                            _state = eState.Construct;
+                        else if (estimation > budget)
                         {
                             if (_saved > 0)
                                 _state = eState.Beta;
@@ -143,13 +176,18 @@ namespace HeuristicStudio.Core.Model.Heuristic.Constructive
                                 _state = eState.Recovery;
                         }
                         else if (estimation == budget)
-                            _state = eState.Alpha;
-                        else if (estimation < budget)
-                            _state = eState.Construct;
+                        {
+                            if (_mode == Mode.NonDeterministic)
+                            {
+                                _alpha_recovery.Add(new Tuple<double, double, List<SCPSet>>(_saved, alpha, new List<SCPSet>(_cadidate)));
+                                _state = eState.Alpha;
+                            }
+                            else if (_mode == Mode.Deterministic)
+                                _state = eState.Distroy;
+                        }
                         break;
 
                     case eState.Feasiblity://--------------------------------------Feasiblity State
-                        RemoveRedundantSet(_solution);
                         bool feasible = IsFeasible(_solution);
                         if (feasible)
                             _collections.Add(_solution.Clone());
@@ -157,28 +195,37 @@ namespace HeuristicStudio.Core.Model.Heuristic.Constructive
                         break;
 
                     case eState.Start://-------------------------------------------Start State
-                        _saved = 0.0;
                         _losted.Clear();
                         _recovery.Clear();
-                        _state = eState.Alpha;
                         _solution = _problem.Solution.Clone();
                         _solution.ComputeAttributeRedundancy();
                         _maxprice = _solution.Cost;
-                        Fitness(_solution);
-                        alpha = _maxAlpha;
+                        if (_mode == Mode.NonDeterministic)
+                        {
+                            _state = eState.Alpha;
+                            Fitness(_solution);
+                            alpha = _maxAlpha;
+                        }
+                        else if (_mode == Mode.Deterministic)
+                            _state = eState.Distroy;
                         budget = 0;
                         estimation = 0.0;
                         break;
 
                     case eState.Iteration://---------------------------------------Iteration State
-                        _saved = 0.0;
                         _losted.Clear();
                         _recovery.Clear();
-                        _state = eState.Alpha;
-                        _solution.ComputeAttributeRedundancy();
                         _maxprice = _solution.Cost;
-                        Fitness(_solution);
-                        alpha = _maxAlpha;
+                        if (_mode == Mode.NonDeterministic)
+                        {
+                            _state = eState.Alpha;
+                            Fitness(_solution);
+                            alpha = _maxAlpha;
+                        }
+                        else if (_mode == Mode.Deterministic)
+                            _state = eState.Distroy;
+                        
+                        _ratio *= _epsilon;
                         budget = 0;
                         estimation = 0.0;
                         _iteration++;
@@ -232,7 +279,8 @@ namespace HeuristicStudio.Core.Model.Heuristic.Constructive
 
                 budget += remove.Cost;
                 solution.Sets.Remove(solution.Sets.Find(s => s.Tag == remove.Tag));
-
+                if (_recovery.Exists(r => r.Tag == remove.Tag) == false)
+                    _recovery.Add(remove);
             });
 
             return budget;
@@ -240,12 +288,10 @@ namespace HeuristicStudio.Core.Model.Heuristic.Constructive
 
         private double Destructor(SCPSolution solution)
         {
-            Random rnd = new Random();
             double budget = 0;
             List<SCPSet> blacklist = new List<SCPSet>();
-            _problem.MarkPrimeSets(solution);
-            solution.ComputeSetConfilict();
-            solution.Sets = solution.Sets.OrderByDescending(s => s.Cost).ThenByDescending(s => s.Confilict).ToList();
+
+            solution.Sets = solution.Sets.OrderByDescending(s => s.Cost).ToList();
 
             if (solution.Sets.Count() == 0) return 0;
 
@@ -279,6 +325,7 @@ namespace HeuristicStudio.Core.Model.Heuristic.Constructive
 
         private void Constructor(List<SCPSet> selected)
         {
+            FindCardinalityInSolution(selected,_solution);
             if (selected != null)
             {
                 selected.ForEach(set =>
@@ -292,32 +339,12 @@ namespace HeuristicStudio.Core.Model.Heuristic.Constructive
                 });
             }
 
-
-            //observed = subsets.Count;
-            //double limit = ((budget / _losted.Count) * set.Count);
-            //double curprice = 0.0;//Current price of having these attributes
-            //set.ForEach(a => curprice += _losted.Find(l => l.Item3 == a).Item2);
-
-            //if (neighbor.Cost < limit)
-            //{
-            //    _improved = true;
-            //    neighbor.Attributes.ForEach(a => a.UsedIn.Add(neighbor));
-            //    budget -= neighbor.Cost;
-            //    candidates.Add(neighbor);
-            //    set.ToList().ForEach(i =>
-            //    {
-            //        _losted.Remove(_losted.Find(l => l.Item3 == i));
-            //    });
-            //    break;
-            //}
-
-
-
         }
 
         private double BudgetPlanning(double budget)
         {
             List<SCPSet> candidate = new List<SCPSet>();
+          
             List<HashSet<int>> subsets = new List<HashSet<int>>();
 
             List<Tuple<double,int, HashSet<int>>> panel = new List<Tuple<double,int, HashSet<int>>>();
@@ -330,17 +357,17 @@ namespace HeuristicStudio.Core.Model.Heuristic.Constructive
                 List<SCPSet> neighbors = _problem.Source.GetNeighbors(set.ToArray());
                 if (neighbors.Count > 0)
                 {
-                    SCPSet neighbor = (SCPSet)neighbors.OrderBy(n => n.Cost).First().Clone();
-                    panel.Add(new Tuple<double,int, HashSet<int>>(neighbor.Cost, neighbor.Tag, set));
+                     SCPSet neighbor = (SCPSet)neighbors.OrderBy(n => n.Cost).First().Clone();
+                    panel.Add(new Tuple<double, int, HashSet<int>>(neighbor.Cost, neighbor.Tag, set));
+                    
                 }
             }
-            panel = panel.OrderBy(p => p.Item1).ToList();
 
-            List<int> ss = new List<int>();
+            List<int> best = new List<int>();
             if (panel.Count > 1)
             {
-                ss = Evaluation(panel);
-                ss.ForEach(s1 => candidate.Add(_problem.Source.Sets.Find(s2 => s2.Tag == s1)));
+                best = Evaluation(panel);
+                best.ForEach(s1 => candidate.Add(_problem.Source.Sets.Find(s2 => s2.Tag == s1)));
             }
             else if (panel.Count == 0)
                 return double.MaxValue;
@@ -350,18 +377,98 @@ namespace HeuristicStudio.Core.Model.Heuristic.Constructive
             candidate = RemoveRedundantSet(candidate);
 
             double total = 0.0;
+
             candidate.ForEach(set =>
             {
                 total += set.Cost;
             });
+
             _cadidate = candidate;
             return total;
+        }
+
+        private List<Tuple<double, int, HashSet<int>, int>> PanelOptimisation(List<Tuple<double, int, HashSet<int>, int>> panel_b)
+        {
+            Dictionary<int,int> frequencies = new Dictionary<int, int>();
+            panel_b.ForEach(p => p.Item3.ToList().ForEach(a =>
+            {
+                if (frequencies.ContainsKey(a) == false)
+                    frequencies.Add(a, 1);
+                else
+                    frequencies[a]++;
+            }));
+
+            panel_b = panel_b.OrderByDescending(p => p.Item1).ToList();
+
+            List<int> blacklist = new List<int>();
+            panel_b.ForEach(p => 
+            {
+                bool useless = true;
+               foreach(var a in p.Item3)
+                {
+                    if (frequencies[a] - 1 == 0)
+                    {
+                        useless = false;
+                        break;
+                    }
+                    else
+                        frequencies[a]--;
+                   
+                }
+                if (useless)
+                    blacklist.Add(p.Item2);
+            });
+
+            blacklist.ForEach(b => panel_b.Remove(panel_b.Find(i => i.Item2 == b)));
+            return panel_b;
+        }
+
+        private double BudgetPlanning()
+        {
+            List<SCPSet> sets = new List<SCPSet>();
+            List<SCPAttribute> attributes = new List<SCPAttribute>();
+            List<HashSet<int>> subsets = new List<HashSet<int>>();
+
+            subsets = SubsetMatrix();
+
+            foreach (var set in subsets)
+            {
+                List<SCPSet> neighbors = _problem.Source.GetNeighbors(set.ToArray());
+                if (neighbors.Count > 0)
+                {
+                    neighbors.ForEach(s =>
+                    {
+                        sets.Add(s);
+                    });
+                }
+            }
+
+            FindCardinalityInSet(sets);
+
+
+             sets.ForEach(s => s.Attributes.ForEach(a1 =>
+             {
+                 if (_losted.Exists(l => l.Item3 == a1.Tag))
+                 {
+                     if(attributes.Exists(a2=>a1.Tag == a2.Tag) == false)
+                         attributes.Add(a1);
+                 }
+             }));
+
+            SCPDataSet source = new SCPDataSet() { Sets = sets, Attributes = attributes };
+            source.Resetset();
+            SCP subproblem = new SCP(new MatrixSize() { X = attributes.Count, Y = sets.Count }) { Source = source };
+
+            IConstructiveHeuristic fog = new SCPGRASP(0.9, 1e-9);
+            double cost = fog.Execute(subproblem);
+            _cadidate = subproblem.Solution.Sets;
+            return cost;
         }
 
         private List<SCPSet> BestWeightSet(List<SCPSet> candidate)
         {
             List<SCPSet> best = new List<SCPSet>();
-            FindCardinality(candidate);
+            FindCardinalityInSet(candidate);
             candidate.ForEach(s =>
             {
                 s.Attributes.ForEach(a =>
@@ -387,13 +494,63 @@ namespace HeuristicStudio.Core.Model.Heuristic.Constructive
             return best;
         }
 
-        private void FindCardinality(List<SCPSet> candidate)
+        private void FindCardinalityInSet(List<SCPSet> candidate)
         {
+            candidate.ForEach(s => s.Attributes.ForEach(a => a.UsedIn.Clear()));
             foreach (var s1 in candidate)
             {
                 s1.Attributes.ForEach(a1 =>
                 {
                     foreach (var s2 in candidate)
+                    {
+                        s2.Attributes.ForEach(a2 =>
+                        {
+
+                            if (a1.Tag == a2.Tag)
+                            {
+                                if (a1.UsedIn.Exists(s => s.Tag == s2.Tag) == false)
+                                    a1.UsedIn.Add(s2);
+                            }
+                        });
+                    }
+                });
+            }
+        }
+
+        private void FindCardinalityInUnion(List<SCPSet> candidate)
+        {
+            List<SCPSet> union = new List<SCPSet>(_solution.Sets);
+            union.AddRange(candidate);
+
+            candidate.ForEach(s => s.Attributes.ForEach(a => a.UsedIn.Clear()));
+            foreach (var s1 in candidate)
+            {
+                s1.Attributes.ForEach(a1 =>
+                {
+                    foreach (var s2 in union)
+                    {
+                        s2.Attributes.ForEach(a2 =>
+                        {
+
+                            if (a1.Tag == a2.Tag)
+                            {
+                                if (a1.UsedIn.Exists(s => s.Tag == s2.Tag) == false)
+                                    a1.UsedIn.Add(s2);
+                            }
+                        });
+                    }
+                });
+            }
+        }
+
+        private void FindCardinalityInSolution(List<SCPSet> candidate,SCPSolution solution)
+        {
+            candidate.ForEach(s => s.Attributes.ForEach(a => a.UsedIn.Clear()));
+            foreach (var s1 in candidate)
+            {
+                s1.Attributes.ForEach(a1 =>
+                {
+                    foreach (var s2 in solution.Sets)
                     {
                         s2.Attributes.ForEach(a2 =>
                         {
@@ -424,7 +581,7 @@ namespace HeuristicStudio.Core.Model.Heuristic.Constructive
                 for (int i = 0; i < length; i++)
                 {
                     if (i == index) continue;
-                    subset.Add(panel[i]);
+                    subset.Add(panel[i]);      
                 }
                 t = new Tuple<double, List<int>>(panel[index].Item1, new List<int>() { panel[index].Item2 });
                 panel[index].Item3.ToList().ForEach(a =>
@@ -463,7 +620,8 @@ namespace HeuristicStudio.Core.Model.Heuristic.Constructive
 
                         if (covered.Count == _losted.Count)
                             break;
-                    }
+                    }//end for
+
                     if (covered.Count == _losted.Count)
                         tablu.Add(t);
                     covered = new List<int>();
@@ -474,9 +632,17 @@ namespace HeuristicStudio.Core.Model.Heuristic.Constructive
                             covered.Add(a);
                     });
 
-                }
+                }//end for
+
                 index++;
-            }
+            }//end while
+
+            Tuple<double, List<int>> temp = new Tuple<double, List<int>>(0,null);
+            panel.ForEach(p => 
+            {
+                temp = new Tuple<double, List<int>>(temp.Item1 + p.Item1, new List<int>() { p.Item2 });
+            });
+            tablu.Add(temp);
             if (tablu.Count > 0)
                 best = tablu.OrderBy(t => t.Item1).First().Item2;
             else
@@ -486,10 +652,9 @@ namespace HeuristicStudio.Core.Model.Heuristic.Constructive
 
         public void Fitness(SCPSolution solution)
         {
-            //_problem.Source.CalculateProbibilityOfAttributes();
-            //solution.ComputeAttributeRedundancy();
+            FindCardinalityInSolution(solution.Sets,_solution);
             List<Tuple<int, double>> alphas = new List<Tuple<int, double>>();
-
+            
             foreach (var set in solution.Sets)
             {
                 double overhead = 0.0;
@@ -504,6 +669,7 @@ namespace HeuristicStudio.Core.Model.Heuristic.Constructive
                             overhead += s.Cost / s.Attributes.Count;
                     });
                 }
+
                 set.Overhead = set.Cost + overhead;
                 alphas.Add(new Tuple<int, double>(set.Tag, overhead));
             }
@@ -516,8 +682,6 @@ namespace HeuristicStudio.Core.Model.Heuristic.Constructive
 
         public void Fitness(List<SCPSet> sets)
         {
-            //_problem.Source.CalculateProbibilityOfAttributes();
-            //solution.ComputeAttributeRedundancy();
             List<Tuple<int, double>> alphas = new List<Tuple<int, double>>();
 
             foreach (var set in sets)
@@ -684,6 +848,7 @@ namespace HeuristicStudio.Core.Model.Heuristic.Constructive
 
         private List<SCPSet> RemoveRedundantSet(List<SCPSet> candidate)
         {
+            FindCardinalityInUnion(candidate);
             List<int> blacklist = new List<int>();
             List<int> frequency = new List<int>();
 
@@ -735,42 +900,13 @@ namespace HeuristicStudio.Core.Model.Heuristic.Constructive
 
         private bool IsFeasible(SCPSolution solution)
         {
-            if (solution.Sets.Count <= 0) return false;
-            #region Step#1 Exhustive test
-            List<int> attributes = new List<int>();
-            solution.Sets.ForEach(s => s.Attributes.ForEach(a => attributes.Add(a.Tag)));
-            attributes = attributes.OrderBy(a => a).ToList();
-            for (int i = 1; i < attributes.Count; i++)
-            {
-                if (attributes[i] - attributes[i - 1] > 1)
-                    return false;
-            }
-            #endregion
+            HashSet<int> problem_att = new HashSet<int>();
+            _problem.Source.Attributes.ForEach(a => problem_att.Add(a.Tag));
 
-            #region Step#2 Formulation test nx(n-1)/2
-            int n = _problem.Matrix.Size.X;
-            int sum1 = n * (n + 1) / 2;
+            HashSet<int> solution_att = new HashSet<int>();
+            solution.USet.ForEach(a => solution_att.Add(a.Item2));
 
-            int seed = attributes[0];
-            int sum2 = seed;
-            for (int i = 1; i < attributes.Count; i++)
-            {
-                if (attributes[i] != seed)
-                {
-                    seed = attributes[i];
-                    sum2 += seed;
-                }
-            }
-            if (sum2 != sum1) return false;
-            #endregion
-
-            #region Step#3 Hashing test
-            int[] list = new int[n];
-            foreach (int item in attributes)
-                list[item - 1] = item;
-            #endregion
-
-            return true;
+            return (problem_att.IsSubsetOf(solution_att));
         }
     }
 

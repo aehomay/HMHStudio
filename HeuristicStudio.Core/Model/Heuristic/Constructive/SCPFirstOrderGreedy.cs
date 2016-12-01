@@ -101,21 +101,25 @@ namespace HeuristicStudio.Core.Model.Heuristic
             {
 
                 SCPSet set = _problem.Source.GetLightestNotVisitedSet();
-
+                bool valuable = false;
                 set.Attributes.ForEach(a1 =>
                 {
-        
-                if (a1.Visit == false)
-                {
-                        a1.Visit = true;
-                    coveredatt++;
-                        a1.UsedIn.ForEach(s1 =>
+
+                    if (a1.Visit == false)
                     {
-                        s1.Frequency--;
-                    });
+                        if (_problem.Source.Attributes.Select(a => a.Tag).ToList().Exists(a => a == a1.Tag))
+                        {
+                            valuable = true;
+                            a1.Visit = true;
+                            coveredatt++;
+                            a1.UsedIn.ForEach(s1 =>
+                                 {
+                                     s1.Frequency--;
+                                 });
+                        }
                     }
                 });
-                if (set.Visit == false)
+                if (set.Visit == false && valuable)
                     ((SCPSolution)FSolution).Sets.Add(set);
                 _problem.Source.Sets.Find(s => s.Tag == set.Tag).Visit = true;
                 _problem.Source.Weighting();
@@ -138,40 +142,19 @@ namespace HeuristicStudio.Core.Model.Heuristic
         private bool IsFeasible(SCPSolution solution)
         {
 
-            #region Step#1 Exhustive test
-            List<int> attributes = new List<int>();
-            solution.Sets.ForEach(s => s.Attributes.ForEach(a => attributes.Add(a.Tag)));
-            attributes = attributes.OrderBy(a => a).ToList();
-            for (int i = 1; i < attributes.Count; i++)
-            {
-                if (attributes[i] - attributes[i - 1] > 1)
-                    return false;
-            }
-            #endregion
+            HashSet<int> problem_att = new HashSet<int>();
+            _problem.Source.Attributes.ForEach(a => problem_att.Add(a.Tag));
 
-            #region Step#2 Formulation test nx(n-1)/2
-            int n = _problem.Matrix.Size.X;
-            int sum1 = n * (n + 1) / 2;
+            HashSet<int> solution_att = new HashSet<int>();
+            solution.USet.ForEach(a => solution_att.Add(a.Item2));
 
-            int seed = attributes[0];
-            int sum2 = seed;
-            for (int i = 1; i < attributes.Count; i++)
-            {
-                if (attributes[i] != seed)
-                {
-                    seed = attributes[i];
-                    sum2 += seed;
-                }
-            }
-            if (sum2 != sum1) return false;
-            #endregion
-
-
-            return true;
+            return (problem_att.IsSubsetOf(solution_att));
         }
 
         private SCPSolution RemoveRedundantSet(SCPSolution solution)
         {
+            if (solution.Sets.Count == 1) return solution;
+
             SCPSolution improved = solution.Clone();
             List<int> blacklist = new List<int>();
 
