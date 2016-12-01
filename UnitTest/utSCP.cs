@@ -101,37 +101,6 @@ namespace UnitTest
             problem.Solution.USet.ForEach(a => solution_att.Add(a.Item2));
 
             return (problem_att.IsSubsetOf(solution_att));
-
-            //#region Step#1 Exhustive test
-            //List<int> attributes = new List<int>();
-            //problem.Solution.Sets.ForEach(s => s.Attributes.ForEach(a => attributes.Add(a.Tag)));
-            //attributes = attributes.OrderBy(a => a).ToList();
-            //for (int i = 1; i < attributes.Count; i++)
-            //{
-            //    if (attributes[i] - attributes[i - 1] > 1)
-            //        return false;
-            //}
-            //#endregion
-
-            //#region Step#2 Formulation test nx(n-1)/2
-            //int n = problem.Matrix.Size.X;
-            //int sum1 = n * (n + 1) / 2;
-
-            //int seed = attributes[0];
-            //int sum2 = seed;
-            //for (int i = 1; i < attributes.Count; i++)
-            //{
-            //    if (attributes[i] != seed)
-            //    {
-            //        seed = attributes[i];
-            //        sum2 += seed;
-            //    }
-            //}
-            //if (sum2 != sum1) return false;
-            //#endregion
-
-
-            //return true;
         }
 
         private bool IsFeasible(SCPSolution solution, SCP problem)
@@ -422,8 +391,6 @@ namespace UnitTest
             allsubsets.Add(set);
         }
 
-    
-
 
     [TestMethod]
         [Description("SmartLocalSearch + GRASP")]
@@ -553,7 +520,6 @@ namespace UnitTest
             });
         }
 
-
         [TestMethod]
         [TestCategory("Benchmark")]
         public void Benchmark2()
@@ -573,8 +539,6 @@ namespace UnitTest
                 TimeSpan elapsed = dc.Elapsed;
 
                 Monitoring.Instance.Write("DCFOG    " + file.Split('\\')[file.Split('\\').Count() - 1] + " " + cost.ToString() + " " + dc.Elapsed.ToString());
-
-
             });
         }
 

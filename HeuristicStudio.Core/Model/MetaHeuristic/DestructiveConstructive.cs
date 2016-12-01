@@ -310,7 +310,8 @@ namespace HeuristicStudio.Core.Model.Heuristic.Constructive
                     if (attribute.Redundancy - 1 <= 0)
                     {
                         Tuple<int, double, int> lost = new Tuple<int, double, int>(remove.Tag, remove.Cost / cla, attribute.Tag);
-                        _losted.Add(lost);
+                        if (_losted.Exists(l => l.Item3 == attribute.Tag) == false)
+                            _losted.Add(lost);
                     }
                 });
 
