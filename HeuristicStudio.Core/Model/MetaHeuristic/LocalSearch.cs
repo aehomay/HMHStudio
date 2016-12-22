@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace HeuristicStudio.Core.Model.MetaHeuristic
 {
-    public class LocalSearch : IImprovementHeuristic<SCPSolution>
+    public class LocalSearch 
     {
         SCP _problem = null;
         SCPSolution _opSolution = null;
@@ -46,7 +46,7 @@ namespace HeuristicStudio.Core.Model.MetaHeuristic
         {
             _sp.Restart();
             Initializer(problem);
-            _currSolution.ComputeAttributeRedundancy();
+            _currSolution.ComputeAttributeRedundancies();
             List<double> cost_history = new List<double>();
 
             while (true)
@@ -83,7 +83,7 @@ namespace HeuristicStudio.Core.Model.MetaHeuristic
             int index = 0;
             int setcount = _currSolution.Sets.Count;
 
-            _currSolution.ComputeAttributeRedundancy();
+            _currSolution.ComputeAttributeRedundancies();
             while (index < setcount)
             {
                 SCPSet target = _currSolution.Sets[index];
@@ -104,7 +104,7 @@ namespace HeuristicStudio.Core.Model.MetaHeuristic
                         {
                             _currSolution.Sets.Remove(target);
                             _currSolution.Sets.Add(set);
-                            _currSolution.ComputeAttributeRedundancy();
+                            _currSolution.ComputeAttributeRedundancies();
                             index = 0;
                             break;
                         }
@@ -120,7 +120,7 @@ namespace HeuristicStudio.Core.Model.MetaHeuristic
             int setcount = _currSolution.Sets.Count;
             List<int> need_to_covered = new List<int>();
 
-            _currSolution.ComputeAttributeRedundancy();
+            _currSolution.ComputeAttributeRedundancies();
             while (index < setcount)
             {
                 SCPSet target = _currSolution.Sets[index];
@@ -146,7 +146,7 @@ namespace HeuristicStudio.Core.Model.MetaHeuristic
                         {
                             _currSolution.Sets.Remove(target);
                             _currSolution.Sets.Add(set);
-                            _currSolution.ComputeAttributeRedundancy();
+                            _currSolution.ComputeAttributeRedundancies();
                             index = 0;
                             break;
                         }
@@ -163,7 +163,7 @@ namespace HeuristicStudio.Core.Model.MetaHeuristic
             SCPSolution improved = solution.Clone();
             List<int> blacklist = new List<int>();
 
-            solution.ComputeAttributeRedundancy();
+            solution.ComputeAttributeRedundancies();
 
             foreach (var set in solution.Sets)
             {

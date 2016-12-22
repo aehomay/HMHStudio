@@ -6,8 +6,6 @@ namespace HeuristicStudio.Core.Model.DataStructure
 {
     public class SCPSolution:ISolution
     {
-
-        
         public List<SCPSet> CriticalList { get; set; }
 
         public List<Tuple<double,int>> LostedAttributes {
@@ -18,7 +16,7 @@ namespace HeuristicStudio.Core.Model.DataStructure
                 {
                     s.Attributes.ForEach(a =>
                     {
-                        a.Redundancy = ComputeAttributeRedundancy(a);
+                        a.Redundancy = GetAttributeRedundancy(a);
                         if (a.Redundancy <= 0)
                         {
                             if (died.Exists(d => d.Item2 == a.Tag) == false)
@@ -42,16 +40,83 @@ namespace HeuristicStudio.Core.Model.DataStructure
             }
         }
         
-
-        public List<Tuple<int,int>> USet
+        public List<int> USet
         {
             get
             {
                 if (Sets.Count == 0)
                     return null;
-                List<Tuple<int, int>> uSet = new List<Tuple<int, int>>();
-                Sets.ForEach(s => s.Attributes.ForEach(a => uSet.Add( new Tuple<int, int>(s.Tag, a.Tag))));
-                return uSet.OrderBy(a => a).ToList(); 
+                List<int> uSet = new List<int>();
+                Sets.ForEach(s => s.Attributes.ForEach(a => uSet.Add(a.Tag)));
+                return uSet.OrderBy(a=>a).ToList(); 
+            }
+        }
+
+        //public Dictionary<int,double> Catalog
+        //{
+        //    get
+        //    {
+        //        if (Sets.Count == 0)
+        //            return null;
+        //        Dictionary<int, double> catalog = new Dictionary<int, double>();
+        //        List<Tuple<int, int>> map = new List<Tuple<int, int>>();
+        //        Sets.ForEach(s => s.Attributes.ForEach(a => map.Add( new Tuple<int, int>(s.Tag, a.Tag))));
+        //        foreach (var item in map)
+        //        {
+        //            if (catalog.ContainsKey(item.Item2) == false)
+        //                catalog.Add(item.Item1, item.Item2);
+        //            else
+        //                catalog[item] = catalog[item]
+        //        }
+
+        //        return (Dictionary<int, double>)catalog.OrderBy(c=>c.Value);
+        //    }
+        //}
+
+        public int[,] Catalog
+        {
+            get
+            {
+                if (Sets.Count == 0)
+                    return null;
+                int length = USet.Count;
+                int[,] list = new int[2, length];
+                Sets.ForEach(s =>
+                {
+                        s.Attributes.ForEach(a =>
+                    {
+                        list[0, length - 1] = s.Tag;
+                        list[1, length - 1] = a.Tag;
+                        length--;
+                    });
+                });
+                return list;
+            }
+        }
+
+        public Dictionary<int,int> AUFrequency
+        {
+            get
+            {
+                Dictionary<int, int> auFrequency = new Dictionary<int, int>();
+                foreach (var item in USet)
+                {
+                    if (auFrequency.ContainsKey(item) == false)
+                        auFrequency.Add(item, USet.Where(u => u == item).Count());
+                }
+                return auFrequency;
+            }
+        }
+
+        public Dictionary<int, int> SUFrequency
+        {
+            get
+            {
+                Dictionary<int, int> suFrequency = new Dictionary<int, int>();
+                foreach (var item in Sets)
+                    suFrequency.Add(item.Tag, item.Attributes.Count);
+
+                return suFrequency;
             }
         }
 
@@ -109,7 +174,7 @@ namespace HeuristicStudio.Core.Model.DataStructure
         {
             set.Attributes.ForEach(a =>
              {
-                 int frequency = USet.Count(i => i.Item2 == a.Tag);
+                 int frequency = USet.Count(i => i == a.Tag);
                  if (frequency - 1 == 0)
                      a.Visit = false;
              });
@@ -118,42 +183,22 @@ namespace HeuristicStudio.Core.Model.DataStructure
             Sets.Remove(Sets.Find(s => s.Tag.ToString() == set.Tag.ToString()));
         }
 
-        public int ComputeConfilict(SCPSet set)
+        public int GetAttributeRedundancy(SCPAttribute attribute)
         {
-            int penalty = 0;
             if (USet == null) return 0;
-            set.Attributes.ForEach(a => 
-            {
-                if (USet.Exists(u=>u.Item2 ==  a.Tag))
-                    penalty++;
-            });
-            return penalty;
+            return USet.Where(u => u == attribute.Tag).Count();
         }
 
-        public int ComputeAttributeRedundancy(SCPAttribute attribute)
-        {
-            int redundancy = 0;
-            if (USet == null) return 0;
-            USet.ForEach(a => 
-            {       
-                if (attribute.Tag == a.Item2)
-                    redundancy++;
-            });
-            return redundancy;
-        }
-
-        public void ComputeAttributeRedundancy()
+        public void ComputeAttributeRedundancies()
         {
             Sets.ForEach(s =>
             {
                 s.Attributes.ForEach(a1 =>
                 {
-                    a1.Redundancy = ComputeAttributeRedundancy(a1);
+                    a1.Redundancy = GetAttributeRedundancy(a1);
                 });
             });
         }
-
-    
 
         public void ComputeAttributeRedundancyPrice()
         {
@@ -161,13 +206,13 @@ namespace HeuristicStudio.Core.Model.DataStructure
             {
                 set.Attributes.ForEach(a =>
                 {
-                    if (USet.Exists(u => u.Item2 == a.Tag))
+                    if (USet.Exists(u => u == a.Tag))
                     {
                         a.Cost = 0;
-                        USet.Where(u => u.Item2 == a.Tag).ToList().ForEach(i =>
+                        USet.Where(u => u == a.Tag).ToList().ForEach(i =>
                         {
                             double price = 0;
-                            SCPSet ts = Sets.Find(s => s.Tag == i.Item1);
+                            SCPSet ts = Sets.Find(s => s.Tag == i);
                             if (ts != null)
                                 price = ts.Cost / ts.Attributes.Count;
                             a.Cost += price;
@@ -177,43 +222,7 @@ namespace HeuristicStudio.Core.Model.DataStructure
                 });
             });
         }
-
-        public void ComputeSetConfilict()
-        {
-            Sets.ForEach(s => 
-            {
-                s.Attributes.ForEach(a => 
-                {
-                    s.Confilict += USet.Count(i => i.Item2 == a.Tag);
-                });
-                s.Confilict -= s.Frequency;
-            });
-        }
-
-        public double ComputeSetRedundancyPrice(SCPSet set)
-        {
-            double total_price = 0;
-            if (USet != null)
-            {
-                set.Attributes.ForEach(a =>
-                {
-                    if (USet.Exists(u => u.Item2 == a.Tag))
-                    {
-                        USet.Where(u => u.Item2 == a.Tag).ToList().ForEach(i =>
-                        {
-                            double price = 0;
-                            SCPSet ts = Sets.Find(s => s.Tag == i.Item1);
-                            if (ts != null)
-                                price = ts.Cost / ts.Attributes.Count;
-                            total_price += price;
-                        });
-
-                    }
-                });
-            } 
-            return total_price;
-        }
-
+        
         public SCPSolution Clone()
         {
             List<SCPAttribute> attributes = new List<DataStructure.SCPAttribute>();
@@ -252,7 +261,7 @@ namespace HeuristicStudio.Core.Model.DataStructure
                 return false;
 
             HashSet<int> universal = new HashSet<int>();
-            USet.ForEach(u => universal.Add(u.Item2));
+            USet.ForEach(u => universal.Add(u));
             HashSet<int> subset = new HashSet<int>();
             set.Attributes.ForEach(a => subset.Add(a.Tag));
             bool r = subset.IsSubsetOf(universal);
@@ -270,6 +279,135 @@ namespace HeuristicStudio.Core.Model.DataStructure
                 });
             });
             return frequencyList;
+        }
+
+        internal double Overhead()
+        {
+            double overhead = 0;
+            ComputeAttributeRedundancies();
+
+            Sets = Sets.OrderByDescending(s => s.Cost).ToList();
+
+            foreach (var set in Sets)
+            {
+                bool useless = true;
+
+                foreach (var a in set.Attributes)
+                {
+                    if (a.Redundancy <= 1)
+                    {
+                        useless = false;
+                        break;
+                    }
+                }
+                if (useless)
+                    overhead += set.Cost;
+            }
+
+            return overhead;
+        }
+
+        public void Adapt(SCPSet set)
+        {
+            double gain = 0;
+            double price = 0;
+
+            Dictionary<int, int> suFreq = SUFrequency;
+            int[,] catalog = Catalog;
+            List<int> targets = new List<int>();
+
+            price += set.Cost;
+            foreach (var attribute in set.Attributes)
+            {
+                for (int i = 0; i < catalog.Length / 2; i++)
+                {
+                    if (catalog[1, i] == attribute.Tag)
+                        targets.Add(catalog[0, i]);
+                }
+            }
+
+            foreach (var t in targets)
+            {
+                suFreq[t]--;
+            }
+
+            foreach (var item in suFreq)
+            {
+                if (item.Value <= 0)
+                    gain += Sets.Find(s => s.Tag == item.Key).Cost;
+            }
+
+            if (set.Cost - gain < 0)
+            {
+                Sets.Add(set);
+                suFreq.Where(s1 => s1.Value == 0).ToList().ForEach(s => Sets.Remove(Sets.Find(s2 => s.Key == s2.Tag)));
+            }
+        }
+
+        public double Delta(SCPSet set)
+        {
+            double gain = 0;
+            double price = 0;
+
+            Dictionary<int, int> suFreq = SUFrequency;
+            int[,] catalog = Catalog;
+            List<int> targets = new List<int>();
+
+            price += set.Cost;
+            foreach (var attribute in set.Attributes)
+            {
+                for (int i = 0; i < catalog.Length / 2; i++)
+                {
+                    if (catalog[1, i] == attribute.Tag)
+                        targets.Add(catalog[0, i]);
+                }
+            }
+
+            foreach (var t in targets)
+            {
+                suFreq[t]--;
+            }
+
+            foreach (var item in suFreq)
+            {
+                if (item.Value <= 0)
+                    gain += Sets.Find(s=>s.Tag == item.Key).Cost;
+            }
+
+            return set.Cost - gain;
+        }
+
+        public double Delta(List<SCPSet> sets)
+        {
+            double gain= 0;
+            double price = 0;
+            Dictionary<int, int> suFreq = SUFrequency;
+            int[,] catalog = Catalog;
+            List<int> targets = new List<int>();
+
+            foreach (var set in sets)
+            {
+                price += set.Cost;
+                foreach (var attribute in set.Attributes)
+                {
+                    for (int i = 0; i < catalog.Length / 2; i++)
+                    {
+                        if (catalog[1, i] == attribute.Tag)
+                            targets.Add(catalog[0, i]);
+                    }
+                }
+            }
+
+            foreach (var t in targets)
+                suFreq[t]--;
+           
+            foreach (var item in suFreq)
+            {
+                if (item.Value <= 0)
+                    gain += Sets.Find(s => s.Tag == item.Key).Cost;
+            }
+
+            return price - gain;
         }
     }
 }

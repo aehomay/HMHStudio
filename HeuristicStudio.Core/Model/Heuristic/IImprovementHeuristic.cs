@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace HeuristicStudio.Core.Model.Heuristic
 {
-    public interface IImprovementHeuristic<T>: IHeuristic
+    public interface IImprovementHeuristic: IHeuristic
     {
-        T OptimumSultion { get; }
+        ISolution OptimumSultion { get; }
     }
 }

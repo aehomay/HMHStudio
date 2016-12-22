@@ -1,16 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using HeuristicStudio.Core.Model.DataStructure;
+﻿using HeuristicStudio.Core.Model.DataStructure;
 using HeuristicStudio.Core.Model.Problems;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace HeuristicStudio.Core.Model.Heuristic
+namespace HeuristicStudio.Core.Model.Heuristic.Improvement
 {
-    public class SCPFirstOrderGreedy : IConstructiveHeuristic
+    public class SCPGreedyImprovement : IImprovementHeuristic
     {
+
         private readonly Stopwatch sp = new Stopwatch();
-        public ISolution FSolution { get; set; }
+        public ISolution OptimumSultion { get; set; }
         protected SCP _problem = null;
         protected double _totalCost = 0;
 
@@ -42,16 +45,16 @@ namespace HeuristicStudio.Core.Model.Heuristic
             }
         }
 
-        public SCPFirstOrderGreedy()
+        public SCPGreedyImprovement()
         {
-            FSolution = new SCPSolution();
+            OptimumSultion = new SCPSolution();
         }
 
         public double Execute(IProblem problem)
         {
-            return Execute(problem,false);
+            return Execute(problem, false);
         }
-        public double Execute(IProblem problem,bool vertical)
+        public double Execute(IProblem problem, bool vertical)
         {
             _problem = (SCP)problem;
             if (vertical)
@@ -59,14 +62,35 @@ namespace HeuristicStudio.Core.Model.Heuristic
             else
                 HorizantalSelection();
 
-            FSolution = RemoveRedundantSet((SCPSolution)FSolution);
-            if (IsFeasible((SCPSolution)FSolution) == false)
+            OptimumSultion = RemoveRedundantSet((SCPSolution)OptimumSultion);
+            if (IsFeasible((SCPSolution)OptimumSultion) == false)
                 _problem.Solution = null;
             else
-                _problem.Solution = (SCPSolution)FSolution;
+                _problem.Solution = (SCPSolution)OptimumSultion;
+
+            improve();
 
             return _problem.Solution.Cost;
         }
+
+        private void improve()
+        {
+            while (true)
+            { 
+                _problem.Source.Sets.ForEach(set =>
+                    {
+                        if (_problem.Solution.Sets.Exists(s => s.Tag == set.Tag) == false)
+                        {
+                            _problem.Solution.Adapt(set);
+                        }
+                    });
+
+                SCPSolution solution = RemoveRedundantSet(_problem.Solution);
+                if (solution.Cost < OptimumSultion.Cost)
+                    OptimumSultion = solution;
+            }
+        }
+
         private void VerticalSelection()
         {
             sp.Restart();
@@ -74,7 +98,7 @@ namespace HeuristicStudio.Core.Model.Heuristic
 
             foreach (var att in _problem.Source.Attributes)
             {
-                SCPSet set = _problem.Source.Sets.Find(s => s.Tag == att.GetCheapestSetTag()); 
+                SCPSet set = _problem.Source.Sets.Find(s => s.Tag == att.GetCheapestSetTag());
                 bool flag = false;
                 set.Attributes.ForEach(a1 =>
                 {
@@ -85,14 +109,14 @@ namespace HeuristicStudio.Core.Model.Heuristic
                     }
                 });
                 if (flag)
-                    ((SCPSolution)FSolution).Sets.Add(set);
+                    ((SCPSolution)OptimumSultion).Sets.Add(set);
             }
             sp.Stop();
-            _problem.Solution = (SCPSolution)FSolution;
+            _problem.Solution = (SCPSolution)OptimumSultion;
         }
         private void HorizantalSelection()
         {
-            FSolution = new SCPSolution();
+            OptimumSultion = new SCPSolution();
             sp.Restart();
             int coveredatt = 0;
             int att_count = _problem.Matrix.Size.X;
@@ -112,20 +136,20 @@ namespace HeuristicStudio.Core.Model.Heuristic
                             a1.Visit = true;
                             coveredatt++;
                             a1.UsedIn.ForEach(s1 =>
-                                 {
-                                     s1.Frequency--;
-                                 });
+                            {
+                                s1.Frequency--;
+                            });
                         }
                     }
                 });
                 if (set.Visit == false && valuable)
-                    ((SCPSolution)FSolution).Sets.Add(set);
+                    ((SCPSolution)OptimumSultion).Sets.Add(set);
                 _problem.Source.Sets.Find(s => s.Tag == set.Tag).Visit = true;
                 _problem.Source.Weighting();
             }
             sp.Stop();
 
-           
+
         }
 
         private void AttributeWeighting()
@@ -187,6 +211,5 @@ namespace HeuristicStudio.Core.Model.Heuristic
             else
                 return solution;
         }
-
     }
 }

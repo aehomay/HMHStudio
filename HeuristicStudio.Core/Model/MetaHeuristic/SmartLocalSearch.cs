@@ -27,7 +27,7 @@ namespace HeuristicStudio.Core.Model.Heuristic.Constructive
     }
 
     //Based on the first improvment strategy
-    public class SmartLocalSearch : IImprovementHeuristic<SCPSolution>,IMetaHeuristic<SCPSolution>
+    public class SmartLocalSearch 
     {
         SCP _problem = null;
         SCPSolution _opSolution = null;
@@ -63,7 +63,7 @@ namespace HeuristicStudio.Core.Model.Heuristic.Constructive
         {
             _sp.Restart();
             Initializer(problem);
-            _currSolution.ComputeAttributeRedundancy();
+            _currSolution.ComputeAttributeRedundancies();
             List<double> cost_history = new List<double>();
   
 
@@ -107,7 +107,7 @@ namespace HeuristicStudio.Core.Model.Heuristic.Constructive
             int index = 0;
             int setcount = _currSolution.Sets.Count;
 
-            _currSolution.ComputeAttributeRedundancy();
+            _currSolution.ComputeAttributeRedundancies();
             while (index < setcount)
             {
                 SCPSet target = _currSolution.Sets[index];
@@ -128,7 +128,7 @@ namespace HeuristicStudio.Core.Model.Heuristic.Constructive
                         {
                             _currSolution.Sets.Remove(target);
                             _currSolution.Sets.Add(set);
-                            _currSolution.ComputeAttributeRedundancy();
+                            _currSolution.ComputeAttributeRedundancies();
                             index = 0;
                             break;
                         }
@@ -266,7 +266,7 @@ namespace HeuristicStudio.Core.Model.Heuristic.Constructive
             {
                 b.Parents.ForEach(p =>
                 {
-                    _currSolution.ComputeAttributeRedundancy();
+                    _currSolution.ComputeAttributeRedundancies();
                     SCPSet set = _currSolution.Sets.Find(s => s.Tag == p);
                     if (set != null)
                         _currSolution.RemoveSet(set);
@@ -387,7 +387,7 @@ namespace HeuristicStudio.Core.Model.Heuristic.Constructive
             int setcount = _currSolution.Sets.Count;
             List<Panel> panel = new List<Panel>();
 
-            _currSolution.ComputeAttributeRedundancy();
+            _currSolution.ComputeAttributeRedundancies();
             while (index < setcount)
             {
                 SCPSet target = _currSolution.Sets[index];
@@ -423,7 +423,7 @@ namespace HeuristicStudio.Core.Model.Heuristic.Constructive
             SCPSolution improved = _currSolution.Clone();
             List<int> blacklist = new List<int>();
 
-            _currSolution.ComputeAttributeRedundancy();
+            _currSolution.ComputeAttributeRedundancies();
 
             foreach (var set in _currSolution.Sets)
             {
