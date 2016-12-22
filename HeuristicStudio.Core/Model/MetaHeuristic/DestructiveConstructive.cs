@@ -8,9 +8,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-
-
-
 namespace HeuristicStudio.Core.Model.Heuristic.Constructive
 {
     public enum Mode

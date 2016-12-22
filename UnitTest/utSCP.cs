@@ -32,20 +32,21 @@ namespace UnitTest
         List<String> files = new List<string>();
         public utSCP()
         {
-            files.Add("C:\\Users\\aehom\\Desktop\\Assignment 1\\SCP-Instances\\scp42.txt");//0-512-(200x1000)
-            files.Add("C:\\Users\\aehom\\Desktop\\Assignment 1\\SCP-Instances\\scp43.txt");//1-516-(200x1000)
-            files.Add("C:\\Users\\aehom\\Desktop\\Assignment 1\\SCP-Instances\\scp44.txt");//2-494-(200x1000)
-            files.Add("C:\\Users\\aehom\\Desktop\\Assignment 1\\SCP-Instances\\scp56.txt");//3-213-(200x2000)
-            files.Add("C:\\Users\\aehom\\Desktop\\Assignment 1\\SCP-Instances\\scp57.txt");//4-293-(200x2000)
-            files.Add("C:\\Users\\aehom\\Desktop\\Assignment 1\\SCP-Instances\\scpa4.txt");//5-234-(300x3000)
-            files.Add("C:\\Users\\aehom\\Desktop\\Assignment 1\\SCP-Instances\\scpa2.txt");//6-252-(300x3000)
-            files.Add("C:\\Users\\aehom\\Desktop\\Assignment 1\\SCP-Instances\\scpa3.txt");//7-232-(300x3000)
-            files.Add("C:\\Users\\aehom\\Desktop\\Assignment 1\\SCP-Instances\\scpa1.txt");//8-253-(300x3000)
-            files.Add("C:\\Users\\aehom\\Desktop\\Assignment 1\\SCP-Instances\\scpb3.txt");//9-80-(300x3000)
-            files.Add("C:\\Users\\aehom\\Desktop\\Assignment 1\\SCP-Instances\\scpb2.txt");//10-76-(300x3000)
-            files.Add("C:\\Users\\aehom\\Desktop\\Assignment 1\\SCP-Instances\\scpb1.txt");//11-69-(300x3000)
-            files.Add("C:\\Users\\aehom\\Desktop\\Assignment 1\\SCP-Instances\\scpb4.txt");//12-79-(300x3000)
-            IOData.ReadFileToMatrix(scpParser, files[0]);
+            string path = Environment.CurrentDirectory.ToString();
+            files.Add(path + "\\SCP-Instances\\scp42.txt");//0-512-(200x1000)
+            files.Add(path + "\\SCP-Instances\\scp43.txt");//1-516-(200x1000)
+            files.Add(path + "\\SCP-Instances\\scp44.txt");//2-494-(200x1000)
+            files.Add(path + "\\SCP-Instances\\scp56.txt");//3-213-(200x2000)
+            files.Add(path + "\\SCP-Instances\\scp57.txt");//4-293-(200x2000)
+            files.Add(path + "\\SCP-Instances\\scpa4.txt");//5-234-(300x3000)
+            files.Add(path + "\\SCP-Instances\\scpa2.txt");//6-252-(300x3000)
+            files.Add(path + "\\SCP-Instances\\scpa3.txt");//7-232-(300x3000)
+            files.Add(path + "\\SCP-Instances\\scpa1.txt");//8-253-(300x3000)
+            files.Add(path + "\\SCP-Instances\\scpb3.txt");//9-80-(300x3000)
+            files.Add(path + "\\SCP-Instances\\scpb2.txt");//10-76-(300x3000)
+            files.Add(path + "\\SCP-Instances\\scpb1.txt");//11-69-(300x3000)
+            files.Add(path + "\\SCP-Instances\\scpb4.txt");//12-79-(300x3000)
+            IOData.ReadFileToMatrix(scpParser, path + "\\SCP-Instances\\test.txt");
             //
             // TODO: Add constructor logic here
             //
@@ -101,37 +102,6 @@ namespace UnitTest
             problem.Solution.USet.ForEach(a => solution_att.Add(a.Item2));
 
             return (problem_att.IsSubsetOf(solution_att));
-
-            //#region Step#1 Exhustive test
-            //List<int> attributes = new List<int>();
-            //problem.Solution.Sets.ForEach(s => s.Attributes.ForEach(a => attributes.Add(a.Tag)));
-            //attributes = attributes.OrderBy(a => a).ToList();
-            //for (int i = 1; i < attributes.Count; i++)
-            //{
-            //    if (attributes[i] - attributes[i - 1] > 1)
-            //        return false;
-            //}
-            //#endregion
-
-            //#region Step#2 Formulation test nx(n-1)/2
-            //int n = problem.Matrix.Size.X;
-            //int sum1 = n * (n + 1) / 2;
-
-            //int seed = attributes[0];
-            //int sum2 = seed;
-            //for (int i = 1; i < attributes.Count; i++)
-            //{
-            //    if (attributes[i] != seed)
-            //    {
-            //        seed = attributes[i];
-            //        sum2 += seed;
-            //    }
-            //}
-            //if (sum2 != sum1) return false;
-            //#endregion
-
-
-            //return true;
         }
 
         private bool IsFeasible(SCPSolution solution, SCP problem)
@@ -353,6 +323,20 @@ namespace UnitTest
             cost = dc.Execute(fog.Problem);
             ((SCP)scpParser.Problem).Solution = dc.OptimumSultion;
             TimeSpan elapsed = dc.Elapsed;
+            bool validity = SolutionValidity();
+            Assert.AreEqual(validity, true);
+        }
+
+        [TestMethod]
+        [Description("DestructiveConstructive + FOG")]
+        [TestCategory("Improvement")]
+        public void XXXX()
+        {
+            IConstructiveHeuristic fog = new SCPImprovementGreedy();
+            double cost = fog.Execute(scpParser.Problem);
+
+            ((SCP)scpParser.Problem).Solution = ((SCP)fog.Problem).Solution;
+            TimeSpan elapsed = fog.Elapsed;
             bool validity = SolutionValidity();
             Assert.AreEqual(validity, true);
         }

@@ -16,6 +16,7 @@ namespace HeuristicStudio.Core.Model.DataStructure
         public int Confilict { get; set; }
         public double Overhead { get; set; }
         public List<int> Parents { get; set; }
+        public double Probibility { get; set; }
         public bool Prime { get; set; }
         public int Freshness
         {
@@ -85,6 +86,7 @@ namespace HeuristicStudio.Core.Model.DataStructure
             copy.Cost = Cost;
             copy.Frequency = Frequency;
             copy.Weight = Weight;
+            copy.Probibility = Probibility;
             return copy;
         }
 
@@ -98,6 +100,7 @@ namespace HeuristicStudio.Core.Model.DataStructure
             clone.Frequency = Frequency;
             clone.Confilict = Confilict;
             clone.Weight = Weight;
+            clone.Probibility = Probibility;
             return clone;
         }
     }

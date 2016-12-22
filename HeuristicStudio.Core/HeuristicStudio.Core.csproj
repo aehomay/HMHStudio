@@ -44,6 +44,7 @@
     <Compile Include="Model\DataStructure\SCPSet.cs" />
     <Compile Include="Model\DataStructure\SCPSolution.cs" />
     <Compile Include="Model\Heuristic\IImprovementHeuristic.cs" />
+    <Compile Include="Model\Heuristic\Improvement\SCPImprovementGreedy.cs" />
     <Compile Include="Model\MetaHeuristic\DestructiveConstructive.cs" />
     <Compile Include="Model\MetaHeuristic\SmartLocalSearch.cs" />
     <Compile Include="Model\Heuristic\Improvement\GreedyInsecticideSpray.cs" />
