@@ -21,7 +21,8 @@ namespace HeuristicStudio.Core.Model.Heuristic.Constructive
         Construct,
         Planner,
         Alpha,
-        Delta,
+        IncDelta,
+        DecDelta,
         Beta,
         Council,
         Feasiblity,
@@ -103,19 +104,7 @@ namespace HeuristicStudio.Core.Model.Heuristic.Constructive
                         _recovery = RemoveRedundantSet(_recovery);
                         _recovery.ForEach(s => _solution.Sets.Add(s));
                         _recovery.Clear();
-                        if (_mode == Mode.NonDeterministic)
-                        {
-                            if (_alpha_recovery.Count > 0)
-                            {
-                                Tuple<double, double, List<SCPSet>> best = _alpha_recovery.OrderByDescending(a => a.Item1).ToList().First();
-                                alpha = best.Item2;
-                                _saved = best.Item1;
-                                Destructor(_solution, alpha);
-                                Constructor(new List<SCPSet>(best.Item3));
-                                _alpha_recovery.Clear();
-                            }
-                        }
-                        _state = eState.Feasiblity;
+                        _state = eState.DecDelta;
                         break;
 
                     case eState.Distroy://------------------------------------Distruction State
@@ -128,26 +117,26 @@ namespace HeuristicStudio.Core.Model.Heuristic.Constructive
                             budget += gain;
                             _state = eState.Save;
                         }
-                        else if (gain == -1)
-                            _state = eState.Final;
-                        else
-                            _state = eState.Alpha;
+                        else if (gain == 0)
+                            _state = eState.Council;
                         break;
 
                     case eState.Construct://----------------------------------Construction State
                         Constructor(new List<SCPSet>(_cadidate));
-                        _state = eState.Feasiblity;
+                        estimation = 0;
+                        if (_losted.Count == 0)
+                            _state = eState.Feasiblity;
+                        else
+                            _state = eState.Distroy;
                         break;
 
                     case eState.Planner://-------------------------------------Planner
-                        estimation = BudgetPlanning(budget);
-                        if (estimation <= budget)
-                        {
-                            _saved += budget - estimation;
-                            _state = eState.Construct;
-                        }
-                        else
-                            _state = eState.Council;
+                        estimation = double.MaxValue;
+                        _cadidate = Order(budget);
+                        if (_cadidate.Count > 0)
+                            estimation = 0.0;
+                        _cadidate.ForEach(s => estimation += s.Cost);
+                        _state = eState.Council;
                         break;
 
                     case eState.Alpha://---------------------------------------Alpha State
@@ -155,46 +144,61 @@ namespace HeuristicStudio.Core.Model.Heuristic.Constructive
                         _state = eState.Distroy;
                         break;
 
-                    case eState.Delta://---------------------------------------Delta State
+                    case eState.DecDelta://---------------------------------------Decerese Delta State
                         _delta *= _epsilon;
+                        if (_delta > _epsilon)
+                            _state = eState.Distroy;
+                        else
+                            _state = eState.Final;
+                        break;
+
+                    case eState.IncDelta://---------------------------------------Increse Delta State
+                        _delta /= _epsilon;
                         _state = eState.Council;
                         break;
 
                     case eState.Beta://----------------------------------------Beta State
                         double rquest = (estimation - budget);
-                        budget += (rquest> _saved)?_saved:rquest;
+                        budget += (rquest > _saved) ? _saved : rquest;
                         _saved = Math.Max((_saved - rquest), 0);
-                        _state = eState.Delta;
+                        _state = eState.DecDelta;
                         break;
 
                     case eState.Council://-------------------------------------Council State
-                        if (estimation < budget )
+                        if (estimation < budget)
+                        {
+                            _saved += budget - estimation;
+                            budget = 0;
                             _state = eState.Construct;
-                        else if (estimation > budget)
+                            break;
+
+                        }
+                        else if (_saved > budget)
                         {
                             if (_saved > 0)
                                 _state = eState.Beta;
                             else
                                 _state = eState.Recovery;
+                            break;
                         }
-                        else if (estimation == budget)
+                        else if (_saved == _maxprice)
                         {
-                            if (_mode == Mode.NonDeterministic)
-                            {
-                                _alpha_recovery.Add(new Tuple<double, double, List<SCPSet>>(_saved, alpha, new List<SCPSet>(_cadidate)));
-                                _state = eState.Alpha;
-                            }
-                            else if (_mode == Mode.Deterministic)
-                                _state = eState.Distroy;
+                            _state = eState.Recovery;
+                            break;
                         }
+                        _state = eState.Distroy;
                         break;
-
+                       
                     case eState.Feasiblity://--------------------------------------Feasiblity State
                         _solution = RemoveRedundantSet(_solution);
                         bool feasible = IsFeasible(_solution);
                         if (feasible)
+                        {
                             _collections.Add(_solution.Clone());
-                        _state = eState.Iteration;
+                            _state = eState.Iteration;
+                        }
+                        else
+                        _state = eState.Council;
                         break;
 
                     case eState.Start://-------------------------------------------Start State
@@ -227,17 +231,18 @@ namespace HeuristicStudio.Core.Model.Heuristic.Constructive
                         }
                         else if (_mode == Mode.Deterministic)
                             _state = eState.Distroy;
-                        
-                        _ratio *= _epsilon;
+
+                        _delta /= _epsilon;
+                        _ratio /= _epsilon;
                         budget = 0;
                         estimation = 0.0;
                         _iteration++;
                         break;
 
                     case eState.Save://---------------------------------------------Save State
-                        //budget += _saved;
-                        _saved += Math.Round(((budget * (_delta / 100))));
-                        budget -= Math.Round(((budget * (_delta / 100))));
+                        budget += _saved;
+                        _saved += budget * (_delta / 100);
+                        budget -= _saved;
                         _state = eState.Planner;
                         break;
 
@@ -291,38 +296,54 @@ namespace HeuristicStudio.Core.Model.Heuristic.Constructive
 
         private double Destructor(SCPSolution solution)
         {
-            double budget = 0;
-            List<SCPSet> blacklist = new List<SCPSet>();
-
-            solution.Sets = solution.Sets.OrderByDescending(s => s.Cost).ToList();
-
             if (solution.Sets.Count() == 0) return 0;
 
-            if (solution.Sets.Where(s => s.Visit == false).Count() <= 1) return -1;
-            SCPSet set = solution.Sets.Where(s=>s.Visit == false).First();
-            set.Visit = true;
-            blacklist.Add(set);
-            blacklist.ForEach(bSet =>
+            double budget = 0;
+            solution.Sets = solution.Sets.OrderByDescending(s => s.Cost).ToList();
+            SCPSet remove = solution.Sets.First();
+
+            remove.Attributes.ForEach(attribute =>
             {
-                SCPSet remove = bSet;// attribute.UsedIn.OrderByDescending(i => i.Cost).ThenByDescending(i => i.Overhead).First();
-                int cla = 0;//Counter of losted attributes from the set that is going to be removed, I will divide the cost of set by the attributes that are going to be replace
-                cla = remove.Attributes.Where(a => a.Redundancy - 1 <= 0).Count();
-
-                remove.Attributes.ForEach(attribute =>
+                if (attribute.Redundancy - 1 <= 0)
                 {
-                    if (attribute.Redundancy - 1 <= 0)
-                    {
-                        Tuple<int, double, int> lost = new Tuple<int, double, int>(remove.Tag, remove.Cost / cla, attribute.Tag);
-                        if (_losted.Exists(l => l.Item3 == attribute.Tag) == false)
-                            _losted.Add(lost);
-                    }
-                });
-
-                budget += remove.Cost;
-                solution.Sets.Remove(solution.Sets.Find(s => s.Tag == remove.Tag));
-                if (_recovery.Exists(r => r.Tag == remove.Tag) == false)
-                    _recovery.Add(remove);
+                    Tuple<int, double, int> lost = new Tuple<int, double, int>(remove.Tag, remove.Cost, attribute.Tag);
+                    if (_losted.Exists(l => l.Item3 == attribute.Tag) == false)
+                        _losted.Add(lost);
+                }
+                else
+                    attribute.Redundancy--;
             });
+
+            budget += remove.Cost;
+            solution.Sets.Remove(remove);
+            if (_recovery.Exists(r => r.Tag == remove.Tag) == false)
+                _recovery.Add(remove);
+
+            //if (solution.Sets.Where(s => s.Visit == false).Count() <= ) return -1;
+            // SCPSet set = solution.Sets.Where(s=>s.Visit == false).First();
+            //set.Visit = true;
+            //blacklist.Add(set);
+            //blacklist.ForEach(bSet =>
+            //{
+            //    SCPSet remove = bSet;// attribute.UsedIn.OrderByDescending(i => i.Cost).ThenByDescending(i => i.Overhead).First();
+            //    int cla = 0;//Counter of losted attributes from the set that is going to be removed, I will divide the cost of set by the attributes that are going to be replace
+            //    cla = remove.Attributes.Where(a => a.Redundancy - 1 <= 0).Count();
+
+            //    remove.Attributes.ForEach(attribute =>
+            //    {
+            //        if (attribute.Redundancy - 1 <= 0)
+            //        {
+            //            Tuple<int, double, int> lost = new Tuple<int, double, int>(remove.Tag, remove.Cost / cla, attribute.Tag);
+            //            if (_losted.Exists(l => l.Item3 == attribute.Tag) == false)
+            //                _losted.Add(lost);
+            //        }
+            //    });
+
+            //    budget += remove.Cost;
+            //    solution.Sets.Remove(solution.Sets.Find(s => s.Tag == remove.Tag));
+            //    if (_recovery.Exists(r => r.Tag == remove.Tag) == false)
+            //        _recovery.Add(remove);
+            //});
 
             return budget;
         }
@@ -344,13 +365,10 @@ namespace HeuristicStudio.Core.Model.Heuristic.Constructive
             _solution.ComputeAttributeRedundancies();
         }
 
-        private double BudgetPlanning(double budget)
+        private List<SCPSet> Order(double budget)
         {
-            List<SCPSet> slist = new List<DataStructure.SCPSet>(_problem.Source.Sets.OrderBy(s => s.Tag));
             List<SCPSet> candidate = new List<SCPSet>();
-          
             List<HashSet<int>> subsets = new List<HashSet<int>>();
-
             List<Tuple<double,int, HashSet<int>>> panel = new List<Tuple<double,int, HashSet<int>>>();
 
             subsets = SubsetMatrix();
@@ -367,29 +385,16 @@ namespace HeuristicStudio.Core.Model.Heuristic.Constructive
                 }
             }
 
-            List<int> best = new List<int>();
-            if (panel.Count > 1)
+            panel = panel.OrderBy(p => p.Item1 / p.Item3.Count).ToList();
+            foreach (var p in panel)
             {
-                best = SelectBestCombination(panel);
-                best.ForEach(s1 => candidate.Add(_problem.Source.Sets.Find(s2 => s2.Tag == s1)));
+                if (p.Item1 < budget)
+                {
+                    candidate.Add(_problem.Source.Sets.Find(s => s.Tag == p.Item2));
+                    budget -= p.Item1;
+                }
             }
-            else if (panel.Count == 0)
-                return double.MaxValue;
-            else
-                candidate.Add(_problem.Source.Sets.Find(s2 => s2.Tag == panel[0].Item2));
-
-            candidate = FindCardinalityInUnion(candidate);
-            candidate = RemoveRedundantSet(candidate);
-
-            double total = 0.0;
-
-            candidate.ForEach(set =>
-            {
-                total += set.Cost;
-            });
-
-            _cadidate = candidate;
-            return total;
+            return candidate;
         }
       
         private List<Tuple<double, int, HashSet<int>, int>> PanelOptimisation(List<Tuple<double, int, HashSet<int>, int>> panel_b)
@@ -631,11 +636,11 @@ namespace HeuristicStudio.Core.Model.Heuristic.Constructive
             });
             tablu.Add(temp);
 
-            List<double> gold = new List<double>();
-            tablu.ForEach(t =>
-            {
-                gold.Add(Delta(t.Item2.ToList(),_solution));
-            });
+            //List<double> gold = new List<double>();
+            //tablu.ForEach(t =>
+            //{
+            //    gold.Add(Delta(t.Item2.ToList(),_solution));
+            //});
 
 
             if (tablu.Count > 0)

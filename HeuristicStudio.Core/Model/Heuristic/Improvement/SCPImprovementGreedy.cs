@@ -164,7 +164,7 @@ namespace HeuristicStudio.Core.Model.Heuristic
             _problem.Source.Attributes.ForEach(a => problem_att.Add(a.Tag));
 
             HashSet<int> solution_att = new HashSet<int>();
-            solution.USet.ForEach(a => solution_att.Add(a.Item2));
+            solution.USet.ForEach(a => solution_att.Add(a));
 
             return (problem_att.IsSubsetOf(solution_att));
         }
@@ -188,7 +188,7 @@ namespace HeuristicStudio.Core.Model.Heuristic
             SCPSolution improved = solution.Clone();
             List<int> blacklist = new List<int>();
 
-            solution.ComputeAttributeRedundancy();
+            solution.ComputeAttributeRedundancies();
             solution.Sets = solution.Sets.OrderByDescending(s => s.Cost).ToList();
             foreach (var set in solution.Sets)
             {

@@ -47,7 +47,7 @@ namespace UnitTest
             files.Add(path + "\\SCP-Instances\\scpb2.txt");//10-76-(300x3000)
             files.Add(path + "\\SCP-Instances\\scpb1.txt");//11-69-(300x3000)
             files.Add(path + "\\SCP-Instances\\scpb4.txt");//12-79-(300x3000)
-            IOData.ReadFileToMatrix(scpParser, path + "\\SCP-Instances\\test.txt");
+            IOData.ReadFileToMatrix(scpParser, path + "\\SCP-Instances\\scp42.txt");
             //
             // TODO: Add constructor logic here
             //
@@ -357,20 +357,7 @@ namespace UnitTest
             Assert.AreEqual(validity, true);
         }
 
-        [TestMethod]
-        [Description("DestructiveConstructive + FOG")]
-        [TestCategory("Improvement")]
-        public void XXXX()
-        {
-            IConstructiveHeuristic fog = new SCPImprovementGreedy();
-            double cost = fog.Execute(scpParser.Problem);
-
-            ((SCP)scpParser.Problem).Solution = ((SCP)fog.Problem).Solution;
-            TimeSpan elapsed = fog.Elapsed;
-            bool validity = SolutionValidity();
-            Assert.AreEqual(validity, true);
-        }
-
+        
         [TestMethod]
         [Description("DestructiveConstructive + GRASP")]
         [TestCategory("Improvement")]
