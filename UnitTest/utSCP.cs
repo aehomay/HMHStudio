@@ -14,6 +14,7 @@ using System.Diagnostics;
 using HeuristicStudio.Infrastructure.IO.Monitor;
 using HeuristicStudio.Core.Service;
 using System.Threading;
+using HeuristicStudio.Core.Model.Heuristic.Improvement;
 
 namespace UnitTest
 {
@@ -98,10 +99,11 @@ namespace UnitTest
             problem.Source.Attributes.ForEach(a => problem_att.Add(a.Tag));
 
             HashSet<int> solution_att = new HashSet<int>();
-            problem.Solution.USet.ForEach(a => solution_att.Add(a.Item2));
+            problem.Solution.USet.ForEach(a => solution_att.Add(a));
 
             return (problem_att.IsSubsetOf(solution_att));
         }
+
 
         private bool IsFeasible(SCPSolution solution, SCP problem)
         {
@@ -148,7 +150,7 @@ namespace UnitTest
             SCPSolution improved = solution.Clone();
             List<int> blacklist = new List<int>();
 
-            solution.ComputeAttributeRedundancy();
+            solution.ComputeAttributeRedundancies();
 
             foreach (var set in solution.Sets)
             {
@@ -241,7 +243,23 @@ namespace UnitTest
             return set;
         }
 
+        [TestMethod]
+        [TestCategory("General")]
+        public void Delta()
+        {
+            IConstructiveHeuristic fog = new SCPFirstOrderGreedy();
+            double cost = fog.Execute(scpParser.Problem);
 
+            double delta = ((SCP)scpParser.Problem).Solution.Delta(((SCP)scpParser.Problem).Solution.Sets[1]);
+            Assert.AreEqual(delta, 0.0);
+
+            List<SCPSet> test = ((SCP)scpParser.Problem).Solution.Sets.Skip(3).ToList();
+            delta = ((SCP)scpParser.Problem).Solution.Delta(test);
+            Assert.AreEqual(delta, 2);
+
+            delta = ((SCP)scpParser.Problem).Solution.Delta(((SCP)scpParser.Problem).Solution.Sets);
+            Assert.AreEqual(delta, 0.0);
+        }
 
         [TestMethod]
         [TestCategory("Constructive")]
@@ -277,6 +295,18 @@ namespace UnitTest
             Assert.AreEqual(validity, true);
         }
 
+
+        [TestMethod]
+        [Description("GreedyImprovement")]
+        [TestCategory("Improvement")]
+        public void GreedyImprovement()
+        {
+            SCPGreedyImprovement scpG = new SCPGreedyImprovement();
+            double cost = scpG.Execute(scpParser.Problem, false);
+            TimeSpan elapsed = scpG.Elapsed;
+            bool validity = SolutionValidity();
+            Assert.AreEqual(validity, true);
+        }
 
         [TestMethod]
         [Description("SmartLocalSearch + SCPFirstOrderGreedy")]
@@ -474,52 +504,7 @@ namespace UnitTest
 
         }
 
-        [TestMethod]
-        [TestCategory("Benchmark")]
-        public void Benchmark1()
-        {
-            SCPParser parser = new SCPParser();
-            files.ForEach(file =>
-            {
-                IOData.ReadFileToMatrix(parser, file);
-
-                IHeuristic h1 = new SCPGRASP(0.9, 1e-9);
-                IHeuristic h2 = new SCPFirstOrderGreedy();
-                IHeuristic h3 = new GreedyInsecticideSpray();
-                IHeuristic h4 = new LocalSearch();
-                IHeuristic h5 = new SmartLocalSearch();
-
-
-
-
-
-
-                double cost1 = h1.Execute((SCP)((SCP)parser.Problem).Clone());
-                double cost2 = h2.Execute((SCP)((SCP)parser.Problem).Clone());
-                double cost3 = h3.Execute((SCP)((SCP)parser.Problem).Clone());
-                double cost4 = h4.Execute((SCP)(((SCP)h1.Problem).Clone()));
-                double cost5 = h5.Execute((SCP)(((SCP)h1.Problem).Clone()));
-
-
-
-                int ms1 = h1.Elapsed.Milliseconds;
-                int ms2 = h2.Elapsed.Milliseconds;
-                int ms3 = h3.Elapsed.Milliseconds;
-                int ms4 = h4.Elapsed.Milliseconds;
-                int ms5 = h5.Elapsed.Milliseconds;
-
-                Monitoring.Instance.Write("GRASP:" + file.Split('\\')[file.Split('\\').Count() - 1] + ":" + cost1.ToString() + ":" + ms1.ToString());
-                Monitoring.Instance.Write("FOG:" + file.Split('\\')[file.Split('\\').Count() - 1] + ":" + cost2.ToString() + ":" + ms2.ToString());
-                Monitoring.Instance.Write("LS:" + file.Split('\\')[file.Split('\\').Count() - 1] + ":" + cost3.ToString() + ":" + ms3.ToString());
-                Monitoring.Instance.Write("GIS:" + file.Split('\\')[file.Split('\\').Count() - 1] + ":" + cost4.ToString() + ":" + ms4.ToString());
-                Monitoring.Instance.Write("BIS:" + file.Split('\\')[file.Split('\\').Count() - 1] + ":" + cost5.ToString() + ":" + ms5.ToString());
-
-
-
-
-            });
-        }
-
+      
         [TestMethod]
         [TestCategory("Benchmark")]
         public void Benchmark2()
