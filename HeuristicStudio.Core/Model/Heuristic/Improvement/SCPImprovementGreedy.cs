@@ -4,7 +4,7 @@ using System.Linq;
 using HeuristicStudio.Core.Model.DataStructure;
 using HeuristicStudio.Core.Model.Problems;
 using System.Diagnostics;
-using HeuristicStudio.Core.Model.DataStructure.SCP;
+using HeuristicStudio.Core.Model.SCPData;
 
 namespace HeuristicStudio.Core.Model.Heuristic
 {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace HeuristicStudio.Core.Model.DataStructure
+namespace HeuristicStudio.Core.Model.SCPData
 {
     public class SCPSolution:ISolution
     {
@@ -225,7 +225,7 @@ namespace HeuristicStudio.Core.Model.DataStructure
         
         public SCPSolution Clone()
         {
-            List<SCPAttribute> attributes = new List<DataStructure.SCPAttribute>();
+            List<SCPAttribute> attributes = new List<SCPAttribute>();
             Sets.ForEach(s => s.Attributes.ForEach(a1 => 
             {
                 if (attributes.Exists(a2 => a2.Tag == a1.Tag) == false)
@@ -245,7 +245,7 @@ namespace HeuristicStudio.Core.Model.DataStructure
                 });
             });
 
-            clone.CriticalList = new List<DataStructure.SCPSet>(CriticalList);
+            clone.CriticalList = new List<SCPSet>(CriticalList);
             
             return clone;
         }

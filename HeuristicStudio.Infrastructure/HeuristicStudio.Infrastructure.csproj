@@ -42,6 +42,7 @@
   <ItemGroup>
     <Compile Include="IO\IOData.cs" />
     <Compile Include="IO\Monitor\Monitoring.cs" />
+    <Compile Include="IO\Parsers\MPCLSPParser.cs" />
     <Compile Include="IO\Parsers\SCPParser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -1,4 +1,5 @@
 ﻿using HeuristicStudio.Core.Model.DataStructure;
+using HeuristicStudio.Core.Model.SCPData;
 using HeuristicStudio.Core.Model.Problems;
 using HeuristicStudio.Core.Service;
 using System;
@@ -280,7 +281,7 @@ namespace HeuristicStudio.Core.Model.Heuristic.Constructive
 
         private List<SCPSet> GenerateTwoNeighborCandidateSet(Matrix<int> matrix, List<Panel> panels)
         {
-            List<SCPSet> candidates = new List<DataStructure.SCPSet>();
+            List<SCPSet> candidates = new List<SCPSet>();
             for (int i = 0; i < matrix.Size.X; i++)
             {
                 for (int j = 0; j < matrix.Size.Y; j++)
@@ -299,7 +300,7 @@ namespace HeuristicStudio.Core.Model.Heuristic.Constructive
 
         private List<SCPSet> GenerateMultiNeighborCandidateSet(Matrix<int> matrix, List<Panel> panels)
         {
-            List<SCPSet> candidates = new List<DataStructure.SCPSet>();
+            List<SCPSet> candidates = new List<SCPSet>();
             for (int i = 0; i < matrix.Size.X; i++)
             {
                 List<Panel> pl = new List<Panel>();

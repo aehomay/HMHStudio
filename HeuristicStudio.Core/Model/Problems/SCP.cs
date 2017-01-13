@@ -1,5 +1,5 @@
 ﻿using HeuristicStudio.Core.Model.DataStructure;
-using HeuristicStudio.Core.Model.DataStructure.SCP;
+using HeuristicStudio.Core.Model.SCPData;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,7 +28,7 @@ namespace HeuristicStudio.Core.Model.Problems
 
         public List<SCPSet> GetCandidateSets(SCPSet set)
         {
-            List<SCPSet> candidates = new List<DataStructure.SCPSet>();
+            List<SCPSet> candidates = new List<SCPSet>();
             foreach (var candidate in Source.Sets)
             {
                 if (set.IsSubset(candidate))

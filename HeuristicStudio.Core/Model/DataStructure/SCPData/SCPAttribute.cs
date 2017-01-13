@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HeuristicStudio.Core.Model.DataStructure
+namespace HeuristicStudio.Core.Model.SCPData
 {
     public class SCPAttribute:ICloneable
     {

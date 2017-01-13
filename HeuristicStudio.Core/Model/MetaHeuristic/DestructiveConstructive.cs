@@ -1,5 +1,5 @@
 ﻿using HeuristicStudio.Core.Model.DataStructure;
-using HeuristicStudio.Core.Model.DataStructure.SCP;
+using HeuristicStudio.Core.Model.SCPData;
 using HeuristicStudio.Core.Model.MetaHeuristic;
 using HeuristicStudio.Core.Model.Problems;
 using HeuristicStudio.Core.Service;
@@ -978,7 +978,7 @@ namespace HeuristicStudio.Core.Model.Heuristic.Constructive
 
         public double Delta(List<int> sets, SCPSolution solution)
         {
-            List<SCPSet> list = new List<DataStructure.SCPSet>();
+            List<SCPSet> list = new List<SCPSet>();
             sets.ForEach(s1 => list.Add(_problem.Source.Sets.Find(s2 => s1 == s2.Tag)));
             return Delta(list, solution);
         }

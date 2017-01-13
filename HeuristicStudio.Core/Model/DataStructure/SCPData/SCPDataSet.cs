@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace HeuristicStudio.Core.Model.DataStructure.SCP
+namespace HeuristicStudio.Core.Model.SCPData
 {
 
     public class SCPDataSet : IDataSource,ICloneable
@@ -80,7 +80,7 @@ namespace HeuristicStudio.Core.Model.DataStructure.SCP
 
         public List<SCPSet> GetNeighbors(List<int> subset)
         {
-            List<SCPSet> subsets = new List<DataStructure.SCPSet>();
+            List<SCPSet> subsets = new List<SCPSet>();
             if (subset.Count > 0)
             {
                 Sets.ForEach(s =>
@@ -94,7 +94,7 @@ namespace HeuristicStudio.Core.Model.DataStructure.SCP
 
         public List<SCPSet> GetNeighbors(int[] subset)
         {
-            List<SCPSet> subsets = new List<DataStructure.SCPSet>();
+            List<SCPSet> subsets = new List<SCPSet>();
             if (subset.Length > 0)
             {
                 Sets.ForEach(s =>

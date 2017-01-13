@@ -1,5 +1,5 @@
 ﻿using HeuristicStudio.Core.Model.DataStructure;
-using HeuristicStudio.Core.Model.DataStructure.SCP;
+using HeuristicStudio.Core.Model.SCPData;
 using HeuristicStudio.Core.Model.Heuristic;
 using HeuristicStudio.Core.Model.Heuristic.Constructive;
 using HeuristicStudio.Core.Model.MetaHeuristic;

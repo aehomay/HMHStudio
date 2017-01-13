@@ -41,8 +41,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ISolution.cs" />
-    <Compile Include="Model\DataStructure\SCPSet.cs" />
-    <Compile Include="Model\DataStructure\SCPSolution.cs" />
+    <Compile Include="Model\DataStructure\MPCLSPData\MPCLSPDemand.cs" />
+    <Compile Include="Model\DataStructure\MPCLSPData\MPCLSPFamily.cs" />
+    <Compile Include="Model\DataStructure\MPCLSPData\MPCLSPLine.cs" />
+    <Compile Include="Model\DataStructure\MPCLSPData\MPCLSPPeriod.cs" />
+    <Compile Include="Model\DataStructure\MPCLSPData\MPCLSPSet.cs" />
+    <Compile Include="Model\DataStructure\MPCLSPData\MPCLSPPlant.cs" />
+    <Compile Include="Model\DataStructure\MPCLSPData\MPCLSPProduct.cs" />
+    <Compile Include="Model\DataStructure\SCPData\SCPSet.cs" />
+    <Compile Include="Model\DataStructure\SCPData\SCPSolution.cs" />
     <Compile Include="Model\Heuristic\IImprovementHeuristic.cs" />
     <Compile Include="Model\Heuristic\Improvement\SCPGreedyImprovement.cs" />
     <Compile Include="Model\Heuristic\Improvement\SCPImprovementGreedy.cs" />
@@ -50,13 +57,14 @@
     <Compile Include="Model\MetaHeuristic\SmartLocalSearch.cs" />
     <Compile Include="Model\IDataSource.cs" />
     <Compile Include="Model\DataStructure\Matrix.cs" />
-    <Compile Include="Model\DataStructure\SCPDataSet.cs" />
-    <Compile Include="Model\DataStructure\SCPAttribute.cs" />
+    <Compile Include="Model\DataStructure\SCPData\SCPDataSet.cs" />
+    <Compile Include="Model\DataStructure\SCPData\SCPAttribute.cs" />
     <Compile Include="Model\MetaHeuristic\LocalSearch.cs" />
     <Compile Include="Model\MetaHeuristic\SCPGRASP.cs" />
     <Compile Include="Model\Heuristic\Constructive\SCPFirstOrderGreedy.cs" />
     <Compile Include="Model\Heuristic\IConstructiveHeuristic.cs" />
     <Compile Include="Model\IProblem.cs" />
+    <Compile Include="Model\Problems\MPCLSP.cs" />
     <Compile Include="Model\Problems\SCP.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Service\IHeuristic.cs" />

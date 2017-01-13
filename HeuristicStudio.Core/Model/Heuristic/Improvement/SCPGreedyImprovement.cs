@@ -1,4 +1,5 @@
 ﻿using HeuristicStudio.Core.Model.DataStructure;
+using HeuristicStudio.Core.Model.SCPData;
 using HeuristicStudio.Core.Model.Problems;
 using System;
 using System.Collections.Generic;

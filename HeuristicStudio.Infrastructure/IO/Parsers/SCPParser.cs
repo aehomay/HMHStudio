@@ -1,7 +1,7 @@
 ﻿using System;
 using HeuristicStudio.Core.Model;
 using HeuristicStudio.Core.Model.DataStructure;
-using HeuristicStudio.Core.Model.DataStructure.SCP;
+using HeuristicStudio.Core.Model.SCPData;
 using HeuristicStudio.Core.Model.Problems;
 
 namespace HeuristicStudio.Infrastructure.IO.Parsers

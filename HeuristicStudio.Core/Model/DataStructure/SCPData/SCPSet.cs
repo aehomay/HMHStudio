@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HeuristicStudio.Core.Model.DataStructure
+namespace HeuristicStudio.Core.Model.SCPData
 {
     public class SCPSet:ICloneable
     {
@@ -36,7 +36,7 @@ namespace HeuristicStudio.Core.Model.DataStructure
 
         public SCPSet()
         {
-            Attributes = new List<DataStructure.SCPAttribute>();
+            Attributes = new List<SCPAttribute>();
         }
 
         public bool IsSubset(SCPSet set)
@@ -79,7 +79,7 @@ namespace HeuristicStudio.Core.Model.DataStructure
         public SCPSet Copy()
         {
             SCPSet copy = new SCPSet();
-            copy.Attributes = new List<DataStructure.SCPAttribute>();
+            copy.Attributes = new List<SCPAttribute>();
             copy.Tag = Tag;
             copy.Overhead = Overhead;
             copy.Confilict = Confilict;
