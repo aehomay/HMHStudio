@@ -12,7 +12,7 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
         private int _uID;
         private double _inventoryCost = 0.0;
         private MPCLSPFamily _family = null;
-
+        private int _totalDemand = 0;
         public double InventoryCost
         {
             get
@@ -53,6 +53,24 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
             }
         }
 
+        public int TotalDemand
+        {
+            get
+            {
+                return _totalDemand;
+            }
+
+            set
+            {
+                _totalDemand = value;
+            }
+        }
+
+        public MPCLSPProduct(int uid)
+        {
+            UID = uid;
+        }
+
         public MPCLSPProduct(int uid, MPCLSPFamily family)
         {
             Family = family;
@@ -61,9 +79,10 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
 
         private MPCLSPProduct(MPCLSPProduct instance)
         {
-            InventoryCost = instance.InventoryCost;
             UID = instance.UID;
             Family = instance.Family;
+            TotalDemand = instance.TotalDemand;
+            InventoryCost = instance.InventoryCost;
         }
 
         public MPCLSPProduct Copy()

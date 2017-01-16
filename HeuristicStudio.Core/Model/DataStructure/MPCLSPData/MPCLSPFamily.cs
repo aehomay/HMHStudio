@@ -9,16 +9,19 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
     public class MPCLSPFamily
     {
         List<MPCLSPProduct> _products = null;
-
-
-        public  MPCLSPFamily()
-        {
         
+        public int UID { get; set; }
+
+        public  MPCLSPFamily(int uid)
+        {
+            UID = uid;
+            _products = new List<MPCLSPProduct>();
         }
 
         private MPCLSPFamily(MPCLSPFamily instance)
         {
-            Products = new List<MPCLSPProduct>(); instance.Products.ForEach(p => _products.Add(p));
+            UID = instance.UID;
+            Products = new List<MPCLSPProduct>(); instance.Products.ForEach(p => _products.Add(p.Copy()));
         }
 
         public List<MPCLSPProduct> Products

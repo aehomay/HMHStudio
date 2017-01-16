@@ -64,8 +64,10 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
             }
         }
 
-        public MPCLSPLine()
+        public MPCLSPLine(int uid)
         {
+            _uID = uid;
+            _products = new List<MPCLSPData.MPCLSPProduct>();
         }
 
         private MPCLSPLine(MPCLSPLine instance)

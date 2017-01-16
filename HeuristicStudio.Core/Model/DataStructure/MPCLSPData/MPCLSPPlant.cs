@@ -9,18 +9,25 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
     public class MPCLSPPlant
     {
         private int _uID;
-        private Dictionary<int, double> _setupCost = null;
-        private Dictionary<int, double> _setupTime = null;
-        private Dictionary<int, double> _productionCost = null;
-        private Dictionary<int,double> _processingTimes = null;
+        private Dictionary<MPCLSPProduct, double> _setupCost = null;
+        private Dictionary<MPCLSPProduct, double> _setupTime = null;
+        private Dictionary<MPCLSPProduct, double> _productionCost = null;
+        private Dictionary<MPCLSPProduct, double> _processingTimes = null;
         private List<MPCLSPLine> _lines = null;
+        private List<MPCLSPProduct> _products = null;
+        private Dictionary<MPCLSPPlant, double> _transferCost = null;
 
+        
         
         public int UID
         {
             get
             {
                 return _uID;
+            }
+            set
+            {
+                _uID = value;
             }
         }
 
@@ -38,11 +45,15 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
         /// Each product has its own production cost in each plant
         /// ProductID,Cost
         /// </summary>
-        public Dictionary<int, double> ProductionCost
+        public Dictionary<MPCLSPProduct, double> ProductionCost
         {
             get
             {
                 return _productionCost;
+            }
+            set
+            {
+                _processingTimes = value;
             }
         }
 
@@ -50,11 +61,15 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
         /// Each product has its own setup cost in each plant
         /// ProductID,Cost
         /// </summary>
-        public Dictionary<int, double> SetupCost
+        public Dictionary<MPCLSPProduct, double> SetupCost
         {
             get
             {
                 return _setupCost;
+            }
+            set
+            {
+                _setupCost = value;
             }
         }
 
@@ -62,11 +77,15 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
         /// Each product has its own processing time in each plant
         /// ProductID,Time
         /// </summary>
-        public Dictionary<int, double> ProcessingTimes
+        public Dictionary<MPCLSPProduct, double> ProcessingTimes
         {
             get
             {
                 return _processingTimes;
+            }
+            set
+            {
+                _processingTimes = value;
             }
         }
 
@@ -74,11 +93,15 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
         /// Each product has its own setup time in each plant
         /// ProductID,Time
         /// </summary>
-        public Dictionary<int, double> SetupTime
+        public Dictionary<MPCLSPProduct, double> SetupTime
         {
             get
             {
                 return _setupTime;
+            }
+            set
+            {
+                _setupTime = value;
             }
         }
 
@@ -98,21 +121,66 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
             }
         }
 
+        /// <summary>
+        /// List of products can be producted in each plant
+        /// </summary>
+        public List<MPCLSPProduct> Products
+        {
+            get
+            {
+                return _products;
+            }
+
+            set
+            {
+                _products = value;
+            }
+        }
+
+        /// <summary>
+        /// Transfer cose from this plant to other plants
+        /// </summary>
+        public Dictionary<MPCLSPPlant, double> TransferCost
+        {
+            get
+            {
+                return _transferCost;
+            }
+
+            set
+            {
+                _transferCost = value;
+            }
+        }
+
+        private MPCLSPPlant(MPCLSPPlant instance)
+        {
+            UID = instance.UID;
+            SetupCost = instance.SetupCost;
+            ProductionCost = instance.ProductionCost;
+            ProcessingTimes = instance.ProcessingTimes;
+            TransferCost = instance.TransferCost;
+            SetupTime = instance.SetupTime;
+            Lines = new List<MPCLSPLine>();instance.Lines.ForEach(l => Lines.Add(l.Copy()));
+            Products = new List<MPCLSPProduct>();instance.Products.ForEach(p => Products.Add(p.Copy()));
+        }
+
+
         public MPCLSPPlant(int uid,List<MPCLSPLine> lines)
         {
             _uID = uid;
-            _setupCost = new Dictionary<int, double>();
-            _productionCost = new Dictionary<int, double>();
-            _processingTimes = new Dictionary<int, double>();
-            _setupTime = new Dictionary<int, double>();
+            _setupCost = new Dictionary<MPCLSPProduct, double>();
+            _productionCost = new Dictionary<MPCLSPProduct, double>();
+            _transferCost = new Dictionary<MPCLSPPlant, double>();
+            _processingTimes = new Dictionary<MPCLSPProduct, double>();
+            _setupTime = new Dictionary<MPCLSPProduct, double>();
+            Products = new List<MPCLSPProduct>();
             _lines = lines;
         }
 
         public MPCLSPPlant Copy()
         {
-            MPCLSPPlant copy = new MPCLSPPlant();
-
-            return copy;
+            return new MPCLSPPlant(this);
         }
 
     }

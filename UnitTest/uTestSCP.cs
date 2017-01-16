@@ -27,11 +27,11 @@ namespace UnitTest
     /// Summary description for utSCP
     /// </summary>
     [TestClass]
-    public class utSCP
+    public class uTestSCP
     {
         SCPParser scpParser = new SCPParser();
         List<String> files = new List<string>();
-        public utSCP()
+        public uTestSCP()
         {
             string path = Environment.CurrentDirectory.ToString();
             files.Add(path + "\\SCP-Instances\\scp42.txt");//0-512-(200x1000)

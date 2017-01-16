@@ -41,19 +41,20 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ISolution.cs" />
-    <Compile Include="Model\DataStructure\MPCLSPData\MPCLSPDemand.cs" />
     <Compile Include="Model\DataStructure\MPCLSPData\MPCLSPFamily.cs" />
     <Compile Include="Model\DataStructure\MPCLSPData\MPCLSPLine.cs" />
     <Compile Include="Model\DataStructure\MPCLSPData\MPCLSPPeriod.cs" />
     <Compile Include="Model\DataStructure\MPCLSPData\MPCLSPSet.cs" />
     <Compile Include="Model\DataStructure\MPCLSPData\MPCLSPPlant.cs" />
     <Compile Include="Model\DataStructure\MPCLSPData\MPCLSPProduct.cs" />
+    <Compile Include="Model\DataStructure\MPCLSPData\MPCLSPSolution.cs" />
     <Compile Include="Model\DataStructure\SCPData\SCPSet.cs" />
     <Compile Include="Model\DataStructure\SCPData\SCPSolution.cs" />
     <Compile Include="Model\Heuristic\IImprovementHeuristic.cs" />
     <Compile Include="Model\Heuristic\Improvement\SCPGreedyImprovement.cs" />
     <Compile Include="Model\Heuristic\Improvement\SCPImprovementGreedy.cs" />
     <Compile Include="Model\MetaHeuristic\DestructiveConstructive.cs" />
+    <Compile Include="Model\MetaHeuristic\MPCLSPHeuristic\MyIL.cs" />
     <Compile Include="Model\MetaHeuristic\SmartLocalSearch.cs" />
     <Compile Include="Model\IDataSource.cs" />
     <Compile Include="Model\DataStructure\Matrix.cs" />
