@@ -16,8 +16,6 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
         private List<MPCLSPLine> _lines = null;
         private List<MPCLSPProduct> _products = null;
         private Dictionary<MPCLSPPlant, double> _transferCost = null;
-
-        
         
         public int UID
         {
@@ -58,8 +56,8 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
         }
 
         /// <summary>
-        /// Each product has its own setup cost in each plant
-        /// ProductID,Cost
+        /// c_fmt setup cost of family f on filing line m in period t
+        /// Each family is considered as a product alone (or, in other words, each family has only one product)
         /// </summary>
         public Dictionary<MPCLSPProduct, double> SetupCost
         {
@@ -107,6 +105,7 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
 
         /// <summary>
         /// Set of lines in each plant
+        ///Note:There is just one filling line per plant
         /// </summary>
         public List<MPCLSPLine> Lines
         {

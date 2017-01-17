@@ -171,7 +171,8 @@ namespace HeuristicStudio.Infrastructure.IO.Parsers
                         MPCLSPProduct product = _problem.DataSet.Products.Find(p => p.UID == j);
                         product.TotalDemand += int.Parse(costs[j - 1]);
                         period.Demands.Add(new PP() { Product = product,Plant= plant },int.Parse(costs[j-1]));
-                        period.Stock.Add(new PP() { Product = product, Plant = plant }, 0);
+                        period.Stock.Add(new PP() { Product = product, Plant = plant }, 0); 
+                        period.StockCost.Add(new PP() { Product = product, Plant = plant }, 1.0); 
                     }
                 }
             }

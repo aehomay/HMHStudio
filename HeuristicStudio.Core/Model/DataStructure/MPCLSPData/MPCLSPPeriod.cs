@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,6 +20,7 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
         private Dictionary<MPCLSPPlant, int> _Capacity = null;
         private Dictionary<PP, int> _demand = null;
         private Dictionary<PP, int> _stock = null;
+        private Dictionary<PP, double> _stockCost = null;
 
         /// <summary>
         /// C_jt is the available capacity of production at plant j in period t
@@ -68,6 +70,23 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
             }
         }
 
+        /// <summary>
+        ///h_ijt unitary holding cost of product i at plant j at the end of period t 
+        ///Note: The stock cost parameter is the unitary holding cost (represented by h_ijt). It is a constant value per unit of product per period.
+        /// </summary>
+        public Dictionary<PP, double> StockCost
+        {
+            get
+            {
+                return _stockCost;
+            }
+
+            set
+            {
+                _stockCost = value;
+            }
+        }
+
         private MPCLSPPeriod(MPCLSPPeriod instance)
         {
             UID = instance.UID;
@@ -76,6 +95,8 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
             Demands.Add(new PP() { Product = p.Key.Product.Copy(), Plant = p.Key.Plant.Copy() }, p.Value));
             Stock = new Dictionary<PP, int>(); instance.Stock.ToList().ForEach(p =>
             Stock.Add(new PP() { Product = p.Key.Product.Copy(), Plant = p.Key.Plant.Copy() }, p.Value));
+            StockCost = new Dictionary<PP, double>(); instance.StockCost.ToList().ForEach(p =>
+            StockCost.Add(new PP() { Product = p.Key.Product.Copy(), Plant = p.Key.Plant.Copy() }, p.Value));
         }
 
         public MPCLSPPeriod(int uid,Dictionary<MPCLSPPlant, int> capacity)
@@ -85,6 +106,7 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
             Capacity.ToList().ForEach(c => c.Key.Lines.ForEach(l => l.Capacity = c.Value));
             Demands = new Dictionary<PP, int>();
             Stock = new Dictionary<PP, int>();
+            StockCost = new Dictionary<PP, double>();
         }
 
   

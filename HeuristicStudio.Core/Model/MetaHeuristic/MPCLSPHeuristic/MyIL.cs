@@ -1,17 +1,22 @@
 ﻿using HeuristicStudio.Core.Model.DataStructure.MPCLSPData;
 using HeuristicStudio.Core.Model.MPCLSPData;
+using HeuristicStudio.Core.Model.Problems;
 using HeuristicStudio.Core.Service;
 using System;
+using System.Diagnostics;
+using System.Linq;
 
 namespace HeuristicStudio.Core.Model.MetaHeuristic.MPCLSPHeuristic
 {
     public class MyIL : IMetaHeuristic<MPCLSPSolution>
     {
+        Stopwatch sw = new Stopwatch();
+        MPCLSP _problem = null;
         public TimeSpan Elapsed
         {
             get
             {
-                throw new NotImplementedException();
+                return sw.Elapsed;
             }
         }
 
@@ -19,13 +24,16 @@ namespace HeuristicStudio.Core.Model.MetaHeuristic.MPCLSPHeuristic
         {
             get
             {
-                throw new NotImplementedException();
+                return _problem;
             }
         }
 
         public double Execute(IProblem problem)
         {
-            throw new NotImplementedException();
+            _problem =(MPCLSP)problem;
+        
+
+            return _problem.Solution.Cost;
         }
 
 
@@ -33,13 +41,17 @@ namespace HeuristicStudio.Core.Model.MetaHeuristic.MPCLSPHeuristic
         {
             double score = 0.0;
 
-            dataset.Periods.ForEach(period => 
+            foreach (var product in dataset.Products)       //presented by i
             {
-                foreach (var demand in period.Demands)
+                foreach (var plant in dataset.Plants)       //presented by j
                 {
-
+                    foreach (var period in dataset.Periods) //presented by t
+                    {
+                        int I_ijt = period.Stock.Where(p => p.Key.Product.UID == product.UID && p.Key.Plant.UID == plant.UID).First().Value;        //Stock of product i at plant j at the end of period t
+                        double h_ijt = period.StockCost.Where(p => p.Key.Product.UID == product.UID && p.Key.Plant.UID == plant.UID).First().Value; //Stock cost (unitary holding cost) of product i at plant j at the end of period t
+                    }
                 }
-            });
+            }
 
             return score;
         }
