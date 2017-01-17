@@ -70,6 +70,12 @@
       <Name>HeuristicStudio.Interfaces</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="MPCLSP_Dataset\InventoryCost.txt" />
+    <Content Include="MPCLSP_Dataset\Period-Capacity.txt" />
+    <Content Include="MPCLSP_Dataset\SC-ST-PC-PT.txt" />
+    <Content Include="MPCLSP_Dataset\TransferCost.txt" />
+  </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>
