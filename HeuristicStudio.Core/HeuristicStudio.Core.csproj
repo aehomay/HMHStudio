@@ -54,7 +54,7 @@
     <Compile Include="Model\Heuristic\Improvement\SCPGreedyImprovement.cs" />
     <Compile Include="Model\Heuristic\Improvement\SCPImprovementGreedy.cs" />
     <Compile Include="Model\MetaHeuristic\DestructiveConstructive.cs" />
-    <Compile Include="Model\MetaHeuristic\MPCLSPHeuristic\MyIL.cs" />
+    <Compile Include="Model\MetaHeuristic\MPCLSPHeuristic\MyILS_MPCLSP.cs" />
     <Compile Include="Model\MetaHeuristic\SmartLocalSearch.cs" />
     <Compile Include="Model\IDataSource.cs" />
     <Compile Include="Model\DataStructure\Matrix.cs" />

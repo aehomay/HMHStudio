@@ -70,6 +70,10 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
             _products = new List<MPCLSPData.MPCLSPProduct>();
         }
 
+        /// <summary>
+        /// Copy constructor for current object
+        /// </summary>
+        /// <param name="instance">Current object</param>
         private MPCLSPLine(MPCLSPLine instance)
         {
             Capacity = instance.Capacity;

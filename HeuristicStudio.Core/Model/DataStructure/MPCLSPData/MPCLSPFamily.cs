@@ -9,8 +9,9 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
     public class MPCLSPFamily
     {
         List<MPCLSPProduct> _products = null;
+        private bool _active = false;
+        private int _uID = 0;
         
-        public int UID { get; set; }
 
         public  MPCLSPFamily(int uid)
         {
@@ -22,8 +23,12 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
         {
             UID = instance.UID;
             Products = new List<MPCLSPProduct>(); instance.Products.ForEach(p => _products.Add(p.Copy()));
+            Active = instance.Active;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public List<MPCLSPProduct> Products
         {
             get
@@ -34,6 +39,38 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
             set
             {
                 _products = value;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public int UID
+        {
+            get
+            {
+                return _uID;
+            }
+
+            set
+            {
+                _uID = value;
+            }
+        }
+
+        /// <summary>
+        /// Y_fmt if is true a setup occurs to family f on filling line m in period t
+        /// </summary>
+        public bool Active
+        {
+            get
+            {
+                return _active;
+            }
+
+            set
+            {
+                _active = value;
             }
         }
 

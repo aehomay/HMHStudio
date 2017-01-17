@@ -9,13 +9,13 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
     public class MPCLSPPlant
     {
         private int _uID;
-        private Dictionary<MPCLSPProduct, double> _setupCost = null;
-        private Dictionary<MPCLSPProduct, double> _setupTime = null;
-        private Dictionary<MPCLSPProduct, double> _productionCost = null;
-        private Dictionary<MPCLSPProduct, double> _processingTimes = null;
+        private Dictionary<int, double> _setupCost = null;
+        private Dictionary<int, double> _setupTime = null;
+        private Dictionary<int, double> _productionCost = null;
+        private Dictionary<int, double> _processingTimes = null;
         private List<MPCLSPLine> _lines = null;
         private List<MPCLSPProduct> _products = null;
-        private Dictionary<MPCLSPPlant, double> _transferCost = null;
+        private Dictionary<int, double> _transferCost = null;
         
         public int UID
         {
@@ -43,7 +43,7 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
         /// Each product has its own production cost in each plant
         /// ProductID,Cost
         /// </summary>
-        public Dictionary<MPCLSPProduct, double> ProductionCost
+        public Dictionary<int, double> ProductionCost
         {
             get
             {
@@ -59,7 +59,7 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
         /// c_fmt setup cost of family f on filing line m in period t
         /// Each family is considered as a product alone (or, in other words, each family has only one product)
         /// </summary>
-        public Dictionary<MPCLSPProduct, double> SetupCost
+        public Dictionary<int, double> SetupCost
         {
             get
             {
@@ -75,7 +75,7 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
         /// Each product has its own processing time in each plant
         /// ProductID,Time
         /// </summary>
-        public Dictionary<MPCLSPProduct, double> ProcessingTimes
+        public Dictionary<int, double> ProcessingTimes
         {
             get
             {
@@ -91,7 +91,7 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
         /// Each product has its own setup time in each plant
         /// ProductID,Time
         /// </summary>
-        public Dictionary<MPCLSPProduct, double> SetupTime
+        public Dictionary<int, double> SetupTime
         {
             get
             {
@@ -137,9 +137,9 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
         }
 
         /// <summary>
-        /// Transfer cose from this plant to other plants
+        /// r_ijkt unitary transfer cost of prduct i from plant j to plant k in period t
         /// </summary>
-        public Dictionary<MPCLSPPlant, double> TransferCost
+        public Dictionary<int, double> TransferCost
         {
             get
             {
@@ -168,11 +168,11 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
         public MPCLSPPlant(int uid,List<MPCLSPLine> lines)
         {
             _uID = uid;
-            _setupCost = new Dictionary<MPCLSPProduct, double>();
-            _productionCost = new Dictionary<MPCLSPProduct, double>();
-            _transferCost = new Dictionary<MPCLSPPlant, double>();
-            _processingTimes = new Dictionary<MPCLSPProduct, double>();
-            _setupTime = new Dictionary<MPCLSPProduct, double>();
+            _setupCost = new Dictionary<int, double>();
+            _productionCost = new Dictionary<int, double>();
+            _transferCost = new Dictionary<int, double>();
+            _processingTimes = new Dictionary<int, double>();
+            _setupTime = new Dictionary<int, double>();
             Products = new List<MPCLSPProduct>();
             _lines = lines;
         }

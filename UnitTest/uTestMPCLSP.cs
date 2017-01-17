@@ -3,6 +3,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using HeuristicStudio.Core.Model.Problems;
 using HeuristicStudio.Core.Model.MPCLSPData;
 using HeuristicStudio.Infrastructure.IO.Parsers;
+using HeuristicStudio.Core.Model.DataStructure.MPCLSPData;
+using HeuristicStudio.Core.Model.MetaHeuristic.MPCLSPHeuristic;
 
 namespace UnitTest
 {
@@ -33,8 +35,10 @@ namespace UnitTest
             Problem = ((MPCLSP)parser.Problem).Copy();
 
             int d = Problem.Demand(1, 1);
-           
 
+            MPCLSPSolution solution = new MPCLSPSolution() { Dataset = Problem.DataSet };
+            MyILS_MPCLSP heuristic = new MyILS_MPCLSP();
+            heuristic.Execute(Problem);
         }
 
         [TestMethod]

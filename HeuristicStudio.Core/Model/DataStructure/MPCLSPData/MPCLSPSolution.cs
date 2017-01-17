@@ -18,7 +18,17 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
         }
 
         MPCLSPSet _dataset = null;
-        MPCLSPSet Dataset { get { return _dataset; } }
+        public MPCLSPSet Dataset
+        {
+            get
+            {
+                return _dataset;
+            }
+            set
+            {
+                _dataset = value;
+            }
+        }
 
         private MPCLSPSolution(MPCLSPSolution instance)
         {
@@ -29,6 +39,7 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
 
         public MPCLSPSolution()
         {
+            _dataset = new MPCLSPSet();
         }
 
         public MPCLSPSolution Copy()

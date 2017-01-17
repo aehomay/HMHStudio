@@ -12,6 +12,10 @@ namespace HeuristicStudio.Core.Model.MPCLSPData
         public List<MPCLSPProduct> Products { get; set; }
         public List<MPCLSPFamily> Families { get; set; }
 
+        /// <summary>
+        /// Copy constructor for current object
+        /// </summary>
+        /// <param name="instance">Current object</param>
         private MPCLSPSet(MPCLSPSet instance)
         {
             Plants = new List<MPCLSPPlant>();instance.Plants.ForEach(p => Plants.Add(p.Copy()));

@@ -53,66 +53,67 @@ namespace HeuristicStudio.Infrastructure.IO.Parsers
             for (int i = 1; i <= products; i++)
             {
                 MPCLSPProduct product = new MPCLSPProduct(i);
+                MPCLSPFamily family = new MPCLSPFamily(i);
+                family.Products.Add(product);
+                _problem.DataSet.Families.Add(family);
                 _problem.DataSet.Products.Add(product);
             }
 
             //Setup Cost
-            for (int i = 1; i <= plants; i++)
+            for (int j = 1; j <= plants; j++)
             {
                 str = file.ReadLine();
-                if (str == "") { i--; continue; }
+                if (str == "") { j--; continue; }
                 string[] costs = str.Trim().Split('\t');
-                MPCLSPLine line = new MPCLSPLine(i) { Families = new List<MPCLSPFamily>() { new MPCLSPFamily(i) } };
-                MPCLSPPlant plant = new MPCLSPPlant(i, new List<MPCLSPLine>() { line });
+                MPCLSPLine line = new MPCLSPLine(j) { Families = new List<MPCLSPFamily>()};
+                MPCLSPPlant plant = new MPCLSPPlant(j, new List<MPCLSPLine>() { line });
                 
                 _problem.DataSet.Plants.Add(plant);
-                for (int j = 1; j <= products; j++)
+                for (int i = 1; i <= products; i++)
                 {
-                    MPCLSPProduct product = _problem.DataSet.Products.Find(p=>p.UID == j);
-                    product.Family = line.Families.FirstOrDefault();
-                    line.Families.FirstOrDefault().Products.Add(product);
+                    MPCLSPProduct product = _problem.DataSet.Products.Find(p=>p.UID == i);
                     line.Products.Add(product);
                     plant.Products.Add(product);
-                    plant.SetupCost.Add(product, double.Parse(costs[j-1]));
+                    plant.SetupCost.Add(product.UID, double.Parse(costs[i-1]));
                 }
             }
 
             //Setup Time
-            for (int i = 1; i <= plants; i++)
+            for (int j = 1; j <= plants; j++)
             {
                 str = file.ReadLine();
-                if (str == "") { i--; continue; }
+                if (str == "") { j--; continue; }
                 string[] costs = str.Trim().Split('\t');
-                MPCLSPPlant plant = _problem.DataSet.Plants.Find(p => p.UID == i);
-                for (int j = 1; j <= products; j++)
+                MPCLSPPlant plant = _problem.DataSet.Plants.Find(p => p.UID == j);
+                for (int i = 1; i <= products; i++)
                 {
-                    plant.SetupTime.Add(plant.Products.Find(p => p.UID == j), double.Parse(costs[j - 1]));
+                    plant.SetupTime.Add(i, double.Parse(costs[i - 1]));
                 }
             }
 
             //Production Cost
-            for (int i = 1; i <= plants; i++)
+            for (int j = 1; j <= plants; j++)
             {
                 str = file.ReadLine();
-                if (str == "") { i--; continue; }
+                if (str == "") { j--; continue; }
                 string[] costs = str.Trim().Split('\t');
-                MPCLSPPlant plant = _problem.DataSet.Plants.Find(p => p.UID == i);
-                for (int j = 1; j <= products; j++)
+                MPCLSPPlant plant = _problem.DataSet.Plants.Find(p => p.UID == j);
+                for (int i = 1; i <= products; i++)
                 {
-                    plant.ProductionCost.Add(plant.Products.Find(p => p.UID == j), double.Parse(costs[j - 1]));
+                    plant.ProductionCost.Add(i, double.Parse(costs[i - 1]));
                 }
             }
 
             //Processing Time
-            for (int i = 1; i <= plants; i++)
+            for (int j = 1; j <= plants; j++)
             {
                 str = file.ReadLine();
-                if (str == "") { i--; continue; }
+                if (str == "") { j--; continue; }
                 string[] costs = str.Trim().Split('\t');
-                MPCLSPPlant plant = _problem.DataSet.Plants.Find(p => p.UID == i);
-                for (int j = 1; j <= products; j++)
+                MPCLSPPlant plant = _problem.DataSet.Plants.Find(p => p.UID == j);
+                for (int i = 1; i <= products; i++)
                 {
-                    plant.ProcessingTimes.Add(plant.Products.Find(p => p.UID == j), double.Parse(costs[j - 1]));
+                    plant.ProcessingTimes.Add(i, double.Parse(costs[i - 1]));
                 }
             }
 
@@ -133,7 +134,7 @@ namespace HeuristicStudio.Infrastructure.IO.Parsers
                 MPCLSPPlant plant = _problem.DataSet.Plants.Find(p => p.UID == i);
                 for (int j = 1; j <= plants; j++)
                 {
-                    plant.TransferCost.Add(_problem.DataSet.Plants.Find(p => p.UID == j), double.Parse(costs[j - 1]));
+                    plant.TransferCost.Add(j, double.Parse(costs[j - 1]));
                 }
             }
 
@@ -148,31 +149,33 @@ namespace HeuristicStudio.Infrastructure.IO.Parsers
             int plants = int.Parse(str.Trim().Split('/')[1]);
             int periods = int.Parse(str.Trim().Split('/')[0]);
 
-            for (int k = 1; k <= periods; k++)
+            for (int t = 1; t <= periods; t++)
             {
                 str = file.ReadLine();
-                if (str == "") { k--; continue; }
+                if (str == "") { t--; continue; }
 
-                MPCLSPPeriod period = new MPCLSPPeriod(k,new Dictionary<MPCLSPPlant, int>());
+                MPCLSPPeriod period = new MPCLSPPeriod(t,new Dictionary<MPCLSPPlant, int>());
                 _problem.DataSet.Periods.Add(period);
                 String[] capacities = str.Trim().Split('\t');
 
-                for (int i = 1; i <= plants; i++)
+                for (int j = 1; j <= plants; j++)
                 {
-                    MPCLSPPlant plant = _problem.DataSet.Plants.Find(p => p.UID == i);
-                    plant.Lines.FirstOrDefault().Capacity = int.Parse(capacities[i - 1]);
+                    MPCLSPPlant plant = _problem.DataSet.Plants.Find(p => p.UID == j);
+                    plant.Lines.FirstOrDefault().Capacity = int.Parse(capacities[j - 1]);
                     period.Capacity.Add(plant, plant.Capacity);
 
                     str = file.ReadLine();
                     string[] costs = str.Trim().Split('\t');
 
-                    for (int j = 1; j <= products; j++)
+                    for (int i = 1; i <= products; i++)
                     {
-                        MPCLSPProduct product = _problem.DataSet.Products.Find(p => p.UID == j);
-                        product.TotalDemand += int.Parse(costs[j - 1]);
-                        period.Demands.Add(new PP() { Product = product,Plant= plant },int.Parse(costs[j-1]));
+                        MPCLSPProduct product = _problem.DataSet.Products.Find(p => p.UID == i);
+                        product.TotalDemand += int.Parse(costs[i - 1]);
+                        period.Demands.Add(new PP() { Product = product,Plant= plant },int.Parse(costs[i-1]));
                         period.Stock.Add(new PP() { Product = product, Plant = plant }, 0); 
-                        period.StockCost.Add(new PP() { Product = product, Plant = plant }, 1.0); 
+                        period.StockCost.Add(new PP() { Product = product, Plant = plant }, 1.0);
+                        period.ProductionQuantity.Add(new PP() { Product = product, Plant = plant }, 0);
+                        //period.TransferQuantity.Add(new PPP() { Product = product, PlantJ = plant, PlantK = plant }, 0);
                     }
                 }
             }

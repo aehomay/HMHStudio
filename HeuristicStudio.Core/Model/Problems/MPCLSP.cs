@@ -13,14 +13,18 @@ namespace HeuristicStudio.Core.Model.Problems
 
         public MPCLSP()
         {
-            Solution = null;
+            Solution = new MPCLSPSolution();
             DataSet = new MPCLSPSet();
         }
 
-        private MPCLSP(MPCLSP mPCLSP)
+        /// <summary>
+        /// Copy constructor for current object
+        /// </summary>
+        /// <param name="instance">Current object</param>
+        private MPCLSP(MPCLSP instance)
         {
-            Solution = mPCLSP.Solution;
-            DataSet = mPCLSP.DataSet.Copy();
+            Solution = instance.Solution;
+            DataSet = instance.DataSet.Copy();
         }
 
         /// <summary>
