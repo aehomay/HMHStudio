@@ -84,5 +84,24 @@ namespace HeuristicStudio.Core.Model.MetaHeuristic.MPCLSPHeuristic
             return score;
         }
 
+        /// <summary>
+        /// All demands for each product in each plant over all periods
+        /// </summary>
+        /// <returns>Dictionary with pair values of {ProductID, Demand}</returns>
+        public Dictionary<int,int> ProductsGrossRequirment()
+        {
+            Dictionary<int, int> _demands = new Dictionary<int, int>();
+            
+            _problem.DataSet.Products.ForEach(product => 
+            {
+                int demand = 0;
+                _problem.DataSet.Plants.ForEach(plant => 
+                {
+                    demand += _problem.DemandInPeriods(plant.UID, product.UID);
+                });
+                _demands.Add(product.UID, demand);
+            });
+            return _demands;
+        }
     }
 }

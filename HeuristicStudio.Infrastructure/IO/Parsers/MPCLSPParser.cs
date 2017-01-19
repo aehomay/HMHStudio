@@ -87,7 +87,7 @@ namespace HeuristicStudio.Infrastructure.IO.Parsers
                 MPCLSPPlant plant = _problem.DataSet.Plants.Find(p => p.UID == j);
                 for (int i = 1; i <= products; i++)
                 {
-                    plant.SetupTime.Add(i, double.Parse(costs[i - 1]));
+                    plant.SetupTime.Add(i, int.Parse(costs[i - 1]));
                 }
             }
 
@@ -113,7 +113,7 @@ namespace HeuristicStudio.Infrastructure.IO.Parsers
                 MPCLSPPlant plant = _problem.DataSet.Plants.Find(p => p.UID == j);
                 for (int i = 1; i <= products; i++)
                 {
-                    plant.ProcessingTimes.Add(i, double.Parse(costs[i - 1]));
+                    plant.ProcessingTimes.Add(i, int.Parse(costs[i - 1]));
                 }
             }
 
