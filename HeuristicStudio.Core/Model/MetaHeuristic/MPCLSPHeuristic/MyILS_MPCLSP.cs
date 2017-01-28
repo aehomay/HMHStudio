@@ -84,5 +84,8 @@ namespace HeuristicStudio.Core.Model.MetaHeuristic.MPCLSPHeuristic
             return score;
         }
 
+    
+
+
     }
 }

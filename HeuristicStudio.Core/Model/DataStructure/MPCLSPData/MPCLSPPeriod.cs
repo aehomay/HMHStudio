@@ -47,6 +47,7 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
         public int UID { get; set; }
 
         private Dictionary<MPCLSPPlant, int> _Capacity = null;
+        private Dictionary<Tuple<int, int, int>,int> _productionUpperBound = null;
         private Dictionary<PP, int> _demand = null;
         private Dictionary<PPP, int> _transferQuantity = null;
         private Dictionary<PP, int> _productionQuantity = null;
@@ -177,6 +178,40 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
         }
 
         /// <summary>
+        /// b_imt Upper bound on production quantity of product i on filling line m in period t
+        /// </summary>
+        public Dictionary<Tuple<int, int, int>,int> ProductionUpperBound
+        {
+            get
+            {
+                return _productionUpperBound;
+            }
+
+            set
+            {
+                _productionUpperBound = value;
+            }
+        }
+
+        /// <summary>
+        /// This property will satisfy links between setup and productions which has been introduced by constrant number 4 in paper
+        /// </summary>
+        public bool CheckProductionUpperBound
+        {
+            get
+            {
+                bool r = true;
+                foreach (var production in ProductionQuantity)
+                {
+                   var q =  ProductionUpperBound.ToList().Find(p => p.Key.Item1 == production.Key.Product.UID && p.Key.Item2 == production.Key.Plant.UID);
+                    r = (production.Value - q.Value) <= 0;
+                    if (r == false) return false;
+                }
+                return r;
+            }
+        }
+
+        /// <summary>
         /// Copy constructor for current object
         /// </summary>
         /// <param name="instance">Current object</param>
@@ -184,6 +219,7 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
         {
             UID = instance.UID;
             Capacity = instance.Capacity;
+            ProductionUpperBound = instance.ProductionUpperBound;
 
             Demands = new Dictionary<PP, int>(); instance.Demands.ToList().ForEach(p =>
             Demands.Add(new PP() { Product = p.Key.Product.Copy(), Plant = p.Key.Plant.Copy() }, p.Value));
@@ -215,6 +251,7 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
             TransferQuantity = new Dictionary<PPP, int>();
             ProductionQuantity = new Dictionary<PP, int>();
             Schedules = new List<Tuple<MPCLSPFamily, MPCLSPLine, MPCLSPPlant>>();
+            ProductionUpperBound = new Dictionary<Tuple<int, int, int>, int>();
         }
 
         /// <summary>
