@@ -52,7 +52,7 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
         private Dictionary<PP, int> _productionQuantity = null;
         private Dictionary<PP, int> _stock = null;
         private Dictionary<PP, double> _stockCost = null;
-        private List<Tuple<MPCLSPFamily, MPCLSPLine, MPCLSPPlant>> _schedule = null;
+
 
         /// <summary>
         /// C_jt is the available capacity of production at plant j in period t
@@ -152,29 +152,7 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
                 _productionQuantity = value;
             }
         }
-        /// <summary>
-        /// Retrieves families that have Y_fmt = true
-        /// </summary>
-        /// <returns>
-        /// A schedule containing the following information:
-        /// <list type="bullet">
-        /// <item>Family<see cref="Tuple{T1,T2,T3}.Item1"/>: The family which is activated for production plan.</item>
-        /// <item>Line<see cref="Tuple{T1,T2,T3}.Item2"/>: The line which is responsible for related family.</item>
-        /// <item>Plant<see cref="Tuple{T1,T2,T3}.Item3"/>: The plant which contains the line.</item>
-        /// </list>
-        /// </returns>
-        public List<Tuple<MPCLSPFamily, MPCLSPLine, MPCLSPPlant>> Schedules
-        {
-            get
-            {
-                return _schedule;
-            }
 
-            set
-            {
-                _schedule = value;
-            }
-        }
 
         /// <summary>
         /// Copy constructor for current object
@@ -199,9 +177,7 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
 
             TransferQuantity = new Dictionary<PPP, int>(); instance.TransferQuantity.ToList().ForEach(p =>
             TransferQuantity.Add(new PPP() { PlantJ = p.Key.PlantJ.Copy(), PlantK = p.Key.PlantK.Copy(),Product = p.Key.Product.Copy() }, p.Value));
-
-            Schedules = new List<Tuple<MPCLSPFamily, MPCLSPLine, MPCLSPPlant>>();instance.Schedules.ForEach(s
-                => Schedules.Add(new Tuple<MPCLSPFamily, MPCLSPLine, MPCLSPPlant>(s.Item1.Copy(), s.Item2.Copy(),s.Item3.Copy())));
+           
         }
 
         public MPCLSPPeriod(int uid,Dictionary<MPCLSPPlant, int> capacity)
@@ -214,21 +190,16 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
             StockCost = new Dictionary<PP, double>();
             TransferQuantity = new Dictionary<PPP, int>();
             ProductionQuantity = new Dictionary<PP, int>();
-            Schedules = new List<Tuple<MPCLSPFamily, MPCLSPLine, MPCLSPPlant>>();
         }
 
-        /// <summary>
-        /// Add a palnt, line and family in schedule
-        /// </summary>
-        /// <param name="family">Family represented by f</param>
-        /// <param name="line">Line represented by m</param>
-        /// <param name="plant">Plant represented by j,k</param>
-        public void AddInSchedule(MPCLSPFamily family, MPCLSPLine line, MPCLSPPlant plant)
+  
+        public int ProductProductionQuantity(int product_uid)
         {
-            Tuple<MPCLSPFamily, MPCLSPLine,MPCLSPPlant> tuple = new Tuple<MPCLSPFamily, MPCLSPLine,MPCLSPPlant>(family.Copy(), line.Copy(), plant.Copy());
-            tuple.Item1.Active = true;
-            Schedules.Add(tuple);
+            int pc = 0;
+            ProductionQuantity.ToList().Where(key => key.Key.Product.UID == product_uid).ToList().ForEach(p => pc += p.Value);
+            return pc;
         }
+
 
         public MPCLSPPeriod Copy()
         {

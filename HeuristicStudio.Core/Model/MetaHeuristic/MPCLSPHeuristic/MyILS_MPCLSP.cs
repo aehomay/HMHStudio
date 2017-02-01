@@ -13,6 +13,7 @@ namespace HeuristicStudio.Core.Model.MetaHeuristic.MPCLSPHeuristic
     {
         Stopwatch sw = new Stopwatch();
         MPCLSP _problem = null;
+      
         public TimeSpan Elapsed
         {
             get
@@ -29,16 +30,25 @@ namespace HeuristicStudio.Core.Model.MetaHeuristic.MPCLSPHeuristic
             }
         }
 
+
+
         public double Execute(IProblem problem)
         {
             _problem =(MPCLSP)problem;
             ((MPCLSPSolution)_problem.Solution).Dataset = _problem.DataSet;
 
+            ConstructiveHeuristic();
 
 
 
             double score = Fitness((MPCLSPSolution)_problem.Solution);
             return _problem.Solution.Cost;
+        }
+
+        private void ConstructiveHeuristic()
+        {
+
+            
         }
 
         /// <summary>
@@ -82,15 +92,23 @@ namespace HeuristicStudio.Core.Model.MetaHeuristic.MPCLSPHeuristic
             }
 
             double Tsetup_cost = 0.0;    //Total setup cost for all families that are in schedule
-            foreach (var period in dataset.Periods)
+            foreach (var schedule in solution.Schedules)
             {
-                foreach (var schedule in period.Schedules)//If exist any schedule for product i in plant j then the value of Y_fmt will be consider 1 otherwise 0
-                {
-                    Tsetup_cost += schedule.Item3.SetupCost[schedule.Item1.UID];
-                }
+                Tsetup_cost += schedule.Plant.SetupCost[schedule.Product.UID];
             }
             score = Tsetup_cost + Tstock_cost; //Total setup cost + Total stock cost
             return score;
+        }
+
+        private double ObjectiveII(MPCLSPSolution solution)
+        {
+            MPCLSPSet dataset = solution.Dataset;
+            double cost = 0.0;
+            dataset.Periods.ForEach(p => 
+            {
+                
+            });
+            return cost;
         }
 
     }

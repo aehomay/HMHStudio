@@ -174,7 +174,6 @@ namespace HeuristicStudio.Infrastructure.IO.Parsers
                         period.Demands.Add(new PP() { Product = product,Plant= plant },int.Parse(costs[i-1]));
                         period.Stock.Add(new PP() { Product = product, Plant = plant }, 0); 
                         period.StockCost.Add(new PP() { Product = product, Plant = plant }, 1.0);
-                        period.ProductionQuantity.Add(new PP() { Product = product, Plant = plant }, 0);
                         //period.TransferQuantity.Add(new PPP() { Product = product, PlantJ = plant, PlantK = plant }, 0);
                     }
                 }

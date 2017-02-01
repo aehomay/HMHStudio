@@ -42,13 +42,20 @@ namespace UnitTest
 
             double pc_pp = Problem.ProductionCostOnPlant(1, 1);
             double pt_pp = Problem.ProcessingTimeInPlant(1, 1);
-        
+
+            Problem.DataSet.Periods[1].ProductionQuantity.Add(new PP() { Plant = Problem.DataSet.Plants[0], Product = Problem.DataSet.Products[0] }, 20);
+            Problem.DataSet.Periods[1].ProductionQuantity.Add(new PP() { Plant = Problem.DataSet.Plants[1], Product = Problem.DataSet.Products[0] }, 20);
+            Problem.DataSet.Periods[1].ProductionQuantity.Add(new PP() { Plant = Problem.DataSet.Plants[2], Product = Problem.DataSet.Products[0] }, 20);
+
+            int pc = Problem.DataSet.Periods[1].ProductProductionQuantity(1);
+            
 
             int d_iut = Problem.ProductDemandOnPlantFromPeriod2Period(1, 1, 1, 6);
             int PD_jut = Problem.PlantDemandFromPeriod2Period(1, 1, 1);
             int D_iut = Problem.ProductDemandFromPeriod2Period(1, 1, 6);
             MPCLSPSolution solution = new MPCLSPSolution() { Dataset = Problem.DataSet };
             MyILS_MPCLSP heuristic = new MyILS_MPCLSP();
+            
             heuristic.Execute(Problem);
         }
 
