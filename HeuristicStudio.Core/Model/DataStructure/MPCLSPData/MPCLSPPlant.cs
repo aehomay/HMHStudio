@@ -10,9 +10,9 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
     {
         private int _uID;
         private Dictionary<int, double> _setupCost = null;
-        private Dictionary<int, double> _setupTime = null;
+        private Dictionary<int, int> _setupTime = null;
         private Dictionary<int, double> _productionCost = null;
-        private Dictionary<int, double> _processingTimes = null;
+        private Dictionary<int, int> _processingTimes = null;
         private List<MPCLSPLine> _lines = null;
         private List<MPCLSPProduct> _products = null;
         private Dictionary<int, double> _transferCost = null;
@@ -51,7 +51,7 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
             }
             set
             {
-                _processingTimes = value;
+                _productionCost = value;
             }
         }
 
@@ -75,7 +75,7 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
         /// Each product has its own processing time in each plant
         /// ProductID,Time
         /// </summary>
-        public Dictionary<int, double> ProcessingTimes
+        public Dictionary<int, int> ProcessingTimes
         {
             get
             {
@@ -91,7 +91,7 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
         /// Each product has its own setup time in each plant
         /// ProductID,Time
         /// </summary>
-        public Dictionary<int, double> SetupTime
+        public Dictionary<int, int> SetupTime
         {
             get
             {
@@ -171,8 +171,8 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
             _setupCost = new Dictionary<int, double>();
             _productionCost = new Dictionary<int, double>();
             _transferCost = new Dictionary<int, double>();
-            _processingTimes = new Dictionary<int, double>();
-            _setupTime = new Dictionary<int, double>();
+            _processingTimes = new Dictionary<int, int>();
+            _setupTime = new Dictionary<int, int>();
             Products = new List<MPCLSPProduct>();
             _lines = lines;
         }

@@ -267,8 +267,6 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
             Schedules.Add(tuple);
         }
 
-
-
         public MPCLSPPeriod Copy()
         {
             return new MPCLSPPeriod(this);
