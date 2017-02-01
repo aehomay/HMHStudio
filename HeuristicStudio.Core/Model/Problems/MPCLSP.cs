@@ -45,30 +45,85 @@ namespace HeuristicStudio.Core.Model.Problems
         /// </summary>
         /// <param name="plant_uid">Plant Id</param>
         /// <param name="product_uid">Product Id</param>
+        /// <param name="period_t">Period t</param>
+        /// <param name="period_u">Period u</param>
         /// <returns>Total X_ijT</returns>
-        public int DemandInPeriods(int plant_uid, int product_uid)
+        public int ProductDemandOnPlantFromPeriod2Period(int plant_uid, int product_uid, int period_t,int period_u)
         {
-            int demand = 0;
-            MPCLSPPlant plant = DataSet.Plants.Find(p => p.UID == plant_uid);
-            MPCLSPProduct product = DataSet.Products.Find(p => p.UID == product_uid);
-            DataSet.Periods.ForEach(p => p.Demands.Where(item => item.Key.Plant.UID == plant.UID && item.Key.Product.UID == product.UID).ToList().ForEach(d => demand += d.Value));
-            return demand;
+            int d_iut = 0;
+            for (; period_t <= period_u; period_t++)
+            {
+                DataSet.Periods[period_t - 1].Demands.Where(d => d.Key.Plant.UID == plant_uid && d.Key.Product.UID == product_uid).ToList().ForEach(d =>
+                {
+                    d_iut += d.Value;
+                });
+            }
+            return d_iut;
         }
 
         /// <summary>
+        /// Will return the setup cost for product i on plant
+        /// </summary>
+        ///<param name = "plant_uid" >Plant Id</param>
+        /// <param name="product_uid">Product Id</param>
+        /// <returns>SC_ij</returns>
+        public double SetupCostOnPlant(int plant_uid, int product_uid)
+        {
+            MPCLSPPlant plant = DataSet.Plants.Find(p => p.UID == plant_uid);
+            return plant.SetupCost[product_uid];
+        }
+
+        /// <summary>
+        /// Will return the production cost for product i on plant
+        /// </summary>
+        ///<param name = "plant_uid" >Plant Id</param>
+        /// <param name="product_uid">Product Id</param>
+        /// <returns>PC_ij</returns>
+        public double ProductionCostOnPlant(int plant_uid, int product_uid)
+        {
+            MPCLSPPlant plant = DataSet.Plants.Find(p => p.UID == plant_uid);
+            return plant.ProductionCost[product_uid];
+        }
+
+        /// <summary>
+        /// Will return the setup time for product i on plant
+        /// </summary>
+        ///<param name = "plant_uid" >Plant Id</param>
+        /// <param name="product_uid">Product Id</param>
+        /// <returns>ST_ij</returns>
+        public double SetupTimeInPlant(int plant_uid, int product_uid)
+        {
+            MPCLSPPlant plant = DataSet.Plants.Find(p => p.UID == plant_uid);
+            return plant.SetupTime[product_uid];
+        }
+
+        /// <summary>
+        /// Will return the processing time for product i on plant
+        /// </summary>
+        ///<param name = "plant_uid" >Plant Id</param>
+        /// <param name="product_uid">Product Id</param>
+        /// <returns>PT_ij</returns>
+        public double ProcessingTimeInPlant(int plant_uid, int product_uid)
+        {
+            MPCLSPPlant plant = DataSet.Plants.Find(p => p.UID == plant_uid);
+            return plant.ProcessingTimes[product_uid];
+        }
+
+        /// <summary>!!!
         /// Will return the production cost for product i from period u to period t in all plants
         /// </summary>
-        /// <param name="plant_uid">Plant Id</param>
         /// <param name="product_uid">Product Id</param>
-        /// <returns>C_fmu</returns>
-        public double ProductProductionCoseFromP2P(int product_uid, int period_u, int period_t)
+        /// <param name="period_t">Period u</param>
+        /// <param name="period_u">Period t</param>
+        /// <returns>Phi_fmut</returns>
+        public double ProductProductionCostFromPeriod2Period(int product_uid, int period_t, int period_u)
         {
             double tCost = 0.0;
             int D_iut = 0;
             MPCLSPProduct product = DataSet.Products.Find(p => p.UID == product_uid);
-            for (;  period_u <= period_t; period_u++)
+            for (;  period_t <= period_u; period_t++)
             {
-                DataSet.Periods[period_u -1].Demands.Where(d => d.Key.Product.UID == product_uid).ToList().ForEach(d =>
+                DataSet.Periods[period_t -1].Demands.Where(d => d.Key.Product.UID == product_uid).ToList().ForEach(d =>
                 {
                     double cost = 0.0;
                     cost = d.Key.Plant.ProductionCost[product_uid];
@@ -81,23 +136,43 @@ namespace HeuristicStudio.Core.Model.Problems
         }
 
         /// <summary>
-        /// Production quantity for all products at plant j from period u to period t
+        /// Product demand for product i from period u to period t
         /// </summary>
-        /// <param name="plant_uid">PlantID</param>
-        /// <param name="period_u">Period u</param>
+        /// <param name="product_uid">ProductID</param>
         /// <param name="period_t">Period t</param>
-        /// <returns>PQ_jut</returns>
-        public int PlantProductionQuantityFromP2P(int plant_uid, int period_u, int period_t)
+        /// <param name="period_u">Period u</param>
+        /// <returns>D_iut</returns>
+        public int ProductDemandFromPeriod2Period(int product_uid, int period_u, int period_t)
         {
-            int quantity = 0;
+            int D_iut = 0;
             for (; period_u <= period_t; period_u++)
             {
-                DataSet.Periods[period_u - 1].Demands.Where(d => d.Key.Plant.UID == plant_uid).ToList().ForEach(d =>
+                DataSet.Periods[period_u - 1].Demands.Where(d => d.Key.Product.UID == product_uid).ToList().ForEach(d =>
                 {
-                    quantity += d.Value;
+                    D_iut += d.Value;
                 });
             }
-            return quantity;
+            return D_iut;
+        }
+
+        /// <summary>
+        /// Plant demand for plant j from period u to period t
+        /// </summary>
+        /// <param name="plant_uid">PlantID</param>
+        /// <param name="period_t">Period t</param>
+        /// <param name="period_u">Period u</param>
+        /// <returns>PD_jut</returns>
+        public int PlantDemandFromPeriod2Period(int plant_uid, int period_t, int period_u)
+        {
+            int PD_jut = 0;
+            for (; period_t <= period_u; period_t++)
+            {
+                DataSet.Periods[period_t - 1].Demands.Where(d => d.Key.Plant.UID == plant_uid).ToList().ForEach(d =>
+                {
+                    PD_jut += d.Value;
+                });
+            }
+            return PD_jut;
         }
 
 

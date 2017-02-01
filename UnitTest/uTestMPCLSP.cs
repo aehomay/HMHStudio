@@ -35,9 +35,18 @@ namespace UnitTest
             Problem = ((MPCLSP)parser.Problem).Copy();
 
 
-            double cost = Problem.ProductProductionCoseFromP2P(1, 1, 1);
-            int d = Problem.DemandInPeriods(1, 1);
-            int pq = Problem.PlantProductionQuantityFromP2P(1, 1, 1);
+            double cost = Problem.ProductProductionCostFromPeriod2Period(1, 1, 1);
+
+            double sc_pp = Problem.SetupCostOnPlant(1, 1);
+            double st_pp = Problem.SetupTimeInPlant(1, 1);
+
+            double pc_pp = Problem.ProductionCostOnPlant(1, 1);
+            double pt_pp = Problem.ProcessingTimeInPlant(1, 1);
+        
+
+            int d_iut = Problem.ProductDemandOnPlantFromPeriod2Period(1, 1, 1, 6);
+            int PD_jut = Problem.PlantDemandFromPeriod2Period(1, 1, 1);
+            int D_iut = Problem.ProductDemandFromPeriod2Period(1, 1, 6);
             MPCLSPSolution solution = new MPCLSPSolution() { Dataset = Problem.DataSet };
             MyILS_MPCLSP heuristic = new MyILS_MPCLSP();
             heuristic.Execute(Problem);

@@ -33,6 +33,10 @@ namespace HeuristicStudio.Core.Model.MetaHeuristic.MPCLSPHeuristic
         {
             _problem =(MPCLSP)problem;
             ((MPCLSPSolution)_problem.Solution).Dataset = _problem.DataSet;
+
+
+
+
             double score = Fitness((MPCLSPSolution)_problem.Solution);
             return _problem.Solution.Cost;
         }
@@ -43,6 +47,11 @@ namespace HeuristicStudio.Core.Model.MetaHeuristic.MPCLSPHeuristic
         /// <param name="dataset"></param>
         /// <returns></returns>
         public double Fitness(MPCLSPSolution solution)
+        {
+            return ObjectiveI(solution);
+        }
+
+        private double ObjectiveI(MPCLSPSolution solution)
         {
             MPCLSPSet dataset = solution.Dataset;
             double score = 0.0;
@@ -67,7 +76,7 @@ namespace HeuristicStudio.Core.Model.MetaHeuristic.MPCLSPHeuristic
 
                             Ttransfer_cost += r_ijkt.Value * W_ijkt;    //Unitary transfer cost of product i from plant j to plant k in period t * transfer quantity of product i from plant j to plant k in period t
                         }
-                        Tstock_cost += Ttransfer_cost + (h_ijt * I_ijt);         //Stock cost of product i * Number of stoced + (Transfer cost in all periods * Number of transfers in all periods)
+                        Tstock_cost += Ttransfer_cost + (h_ijt * I_ijt);      //Stock cost of product i * Number of stoced + (Transfer cost in all periods * Number of transfers in all periods)
                     }
                 }
             }
@@ -75,7 +84,7 @@ namespace HeuristicStudio.Core.Model.MetaHeuristic.MPCLSPHeuristic
             double Tsetup_cost = 0.0;    //Total setup cost for all families that are in schedule
             foreach (var period in dataset.Periods)
             {
-                foreach (var schedule in period.Schedules)
+                foreach (var schedule in period.Schedules)//If exist any schedule for product i in plant j then the value of Y_fmt will be consider 1 otherwise 0
                 {
                     Tsetup_cost += schedule.Item3.SetupCost[schedule.Item1.UID];
                 }
@@ -84,24 +93,5 @@ namespace HeuristicStudio.Core.Model.MetaHeuristic.MPCLSPHeuristic
             return score;
         }
 
-        /// <summary>
-        /// All demands for each product in each plant over all periods
-        /// </summary>
-        /// <returns>Dictionary with pair values of {ProductID, Demand}</returns>
-        public Dictionary<int,int> ProductsGrossRequirment()
-        {
-            Dictionary<int, int> _demands = new Dictionary<int, int>();
-            
-            _problem.DataSet.Products.ForEach(product => 
-            {
-                int demand = 0;
-                _problem.DataSet.Plants.ForEach(plant => 
-                {
-                    demand += _problem.DemandInPeriods(plant.UID, product.UID);
-                });
-                _demands.Add(product.UID, demand);
-            });
-            return _demands;
-        }
     }
 }
