@@ -12,7 +12,8 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
         private int _uID;
         private double _inventoryCost = 0.0;
         private int _totalDemand = 0;
-        
+        private bool _installed = false;
+
         public double InventoryCost
         {
             get
@@ -52,6 +53,19 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
             }
         }
 
+        public bool Installed
+        {
+            get
+            {
+                return _installed;
+            }
+
+            set
+            {
+                _installed = value;
+            }
+        }
+
         public MPCLSPProduct(int uid)
         {
             UID = uid;
@@ -66,7 +80,10 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
             UID = instance.UID;
             TotalDemand = instance.TotalDemand;
             InventoryCost = instance.InventoryCost;
+            Installed = instance.Installed;
         }
+
+     
 
         public MPCLSPProduct Copy()
         {

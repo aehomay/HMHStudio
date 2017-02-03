@@ -154,7 +154,7 @@ namespace HeuristicStudio.Infrastructure.IO.Parsers
                 str = file.ReadLine();
                 if (str == "") { t--; continue; }
 
-                MPCLSPPeriod period = new MPCLSPPeriod(t,new Dictionary<MPCLSPPlant, int>());
+                MPCLSPPeriod period = new MPCLSPPeriod(t,new Dictionary<int, int>());
                 _problem.DataSet.Periods.Add(period);
                 String[] capacities = str.Trim().Split('\t');
 
@@ -162,8 +162,8 @@ namespace HeuristicStudio.Infrastructure.IO.Parsers
                 {
                     MPCLSPPlant plant = _problem.DataSet.Plants.Find(p => p.UID == j);
                     plant.Lines.FirstOrDefault().Capacity = int.Parse(capacities[j - 1]);
-                    period.Capacity.Add(plant, plant.Capacity);
-
+                    period.Capacity.Add(plant.UID, plant.Capacity);
+                    period.Plants.Add(plant);
                     str = file.ReadLine();
                     string[] costs = str.Trim().Split('\t');
 

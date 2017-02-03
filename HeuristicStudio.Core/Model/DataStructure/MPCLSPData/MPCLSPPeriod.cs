@@ -46,19 +46,22 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
        
         public int UID { get; set; }
 
-        private Dictionary<MPCLSPPlant, int> _Capacity = null;
+        private Dictionary<int, int> _Capacity = null;
         private Dictionary<Tuple<int, int, int>,int> _productionUpperBound = null;
         private Dictionary<PP, int> _demand = null;
         private Dictionary<PPP, int> _transferQuantity = null;
         private Dictionary<PP, int> _productionQuantity = null;
         private Dictionary<PP, int> _stock = null;
         private Dictionary<PP, double> _stockCost = null;
-
+        private List<Tuple<double, PP>> _demandWeghit = new List<Tuple<double, PP>>();
+        private List<Tuple<double, int>> _productionWeghit = new List<Tuple<double, int>>();
+        private List<Tuple<int,int>> _bestPP = new List<Tuple<int, int>>();
+        private List<MPCLSPPlant> _plants = null;
 
         /// <summary>
         /// C_jt is the available capacity of production at plant j in period t
         /// </summary>
-        public Dictionary<MPCLSPPlant, int> Capacity
+        public Dictionary<int, int> Capacity
         {
             get
             {
@@ -189,6 +192,45 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
             }
         }
 
+        public List<Tuple<double, PP>> DemandWeghit
+        {
+            get
+            {
+                return _demandWeghit;
+            }
+
+            set
+            {
+                _demandWeghit = value;
+            }
+        }
+
+        public List<MPCLSPPlant> Plants
+        {
+            get
+            {
+                return _plants;
+            }
+
+            set
+            {
+                _plants = value;
+            }
+        }
+
+        public List<Tuple<int, int>> BestPP
+        {
+            get
+            {
+                return _bestPP;
+            }
+
+            set
+            {
+                _bestPP = value;
+            }
+        }
+
         /// <summary>
         /// Copy constructor for current object
         /// </summary>
@@ -198,6 +240,11 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
             UID = instance.UID;
             Capacity = instance.Capacity;
             ProductionUpperBound = instance.ProductionUpperBound;
+
+            BestPP = instance.BestPP;
+
+            Plants = new List<MPCLSPPlant>(); instance.Plants.ToList().ForEach(p =>
+            Plants.Add(p.Copy()));
 
             Demands = new Dictionary<PP, int>(); instance.Demands.ToList().ForEach(p =>
             Demands.Add(new PP() { Product = p.Key.Product.Copy(), Plant = p.Key.Plant.Copy() }, p.Value));
@@ -213,23 +260,50 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
 
             TransferQuantity = new Dictionary<PPP, int>(); instance.TransferQuantity.ToList().ForEach(p =>
             TransferQuantity.Add(new PPP() { PlantJ = p.Key.PlantJ.Copy(), PlantK = p.Key.PlantK.Copy(),Product = p.Key.Product.Copy() }, p.Value));
-           
+
         }
 
-        public MPCLSPPeriod(int uid,Dictionary<MPCLSPPlant, int> capacity)
+        public MPCLSPPeriod(int uid,Dictionary<int, int> capacity)
         {
             UID = uid;
             Capacity = capacity;
-            Capacity.ToList().ForEach(c => c.Key.Lines.ForEach(l => l.Capacity = c.Value));
+            //Capacity.ToList().ForEach(c => c.Key.Lines.ForEach(l => l.Capacity = c.Value));
             Demands = new Dictionary<PP, int>();
             Stock = new Dictionary<PP, int>();
             StockCost = new Dictionary<PP, double>();
             TransferQuantity = new Dictionary<PPP, int>();
             ProductionQuantity = new Dictionary<PP, int>();
-            Schedules = new List<Tuple<MPCLSPFamily, MPCLSPLine, MPCLSPPlant>>();
+            Plants = new List<MPCLSPPlant>();
+         
+
         }
 
-  
+        /// <summary>
+        /// Find the best plant to setup product
+        /// </summary>
+        /// <param name="product_uid"></param>
+        /// <returns>Plant Id</returns>
+        public int BestPlantToSetup(int product_uid)
+        {
+            int id = Plants[0].UID;
+            for (int i = 1; i < Plants.Count; i++)
+            {
+                if (Plants[i].SetupWeghit.Find(p => p.Item2 == product_uid).Item1 < Plants[id].SetupWeghit.Find(p => p.Item2 == product_uid).Item1)
+                    id = i;
+            }
+            
+            return id;
+        }
+
+        public int ProductDemandInPeriod(int product_uid)
+        {
+            int pdp = 0;
+
+            Demands.ToList().Where(d => d.Key.Product.UID == product_uid).ToList().ForEach(pd => pdp += pd.Value);
+
+            return pdp;
+        }
+
         public int ProductProductionQuantity(int product_uid)
         {
             int pc = 0;

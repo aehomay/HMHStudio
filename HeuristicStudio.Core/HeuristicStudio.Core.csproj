@@ -48,6 +48,7 @@
     <Compile Include="Model\DataStructure\MPCLSPData\MPCLSPPlant.cs" />
     <Compile Include="Model\DataStructure\MPCLSPData\MPCLSPProduct.cs" />
     <Compile Include="Model\DataStructure\MPCLSPData\MPCLSPSolution.cs" />
+    <Compile Include="Model\DataStructure\MPCLSPData\Schedule.cs" />
     <Compile Include="Model\DataStructure\SCPData\SCPSet.cs" />
     <Compile Include="Model\DataStructure\SCPData\SCPSolution.cs" />
     <Compile Include="Model\Heuristic\IImprovementHeuristic.cs" />

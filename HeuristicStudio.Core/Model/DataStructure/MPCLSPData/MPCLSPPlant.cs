@@ -16,7 +16,12 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
         private List<MPCLSPLine> _lines = null;
         private List<MPCLSPProduct> _products = null;
         private Dictionary<int, double> _transferCost = null;
-        
+        private List<Tuple<double, int>> _setupWeghit = new List<Tuple<double, int>>();
+        private List<Tuple<double, int>> _productionWeghit = new List<Tuple<double, int>>();
+        private int _leftCapacity = 0;
+        private List<int> _installedProducts = new List<int>();
+        private bool _fullField = false;
+
         public int UID
         {
             get
@@ -36,6 +41,32 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
                 int capacity = 0;
                 Lines.ForEach(l => capacity += l.Capacity);
                 return capacity;
+            }
+        }
+
+        public List<Tuple<double, int>> SetupWeghit
+        {
+            get
+            {
+                return _setupWeghit;
+            }
+
+            set
+            {
+                _setupWeghit = value;
+            }
+        }
+
+        public List<Tuple<double, int>> ProductionWeghit
+        {
+            get
+            {
+                return _productionWeghit;
+            }
+
+            set
+            {
+                _productionWeghit = value;
             }
         }
 
@@ -69,6 +100,12 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
             {
                 _setupCost = value;
             }
+        }
+
+        internal int BestNeighborPlant()
+        {
+            double min_transfer_cost = TransferCost.Min(t => t.Value);
+            return TransferCost.Where(t => t.Value == min_transfer_cost).FirstOrDefault().Key;
         }
 
         /// <summary>
@@ -152,6 +189,45 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
             }
         }
 
+        public int LeftCapacity
+        {
+            get
+            {
+                return _leftCapacity;
+            }
+
+            set
+            {
+                _leftCapacity = value;
+            }
+        }
+
+        public List<int> InstalledProducts
+        {
+            get
+            {
+                return _installedProducts;
+            }
+
+            set
+            {
+                _installedProducts = value;
+            }
+        }
+
+        public bool FullField
+        {
+            get
+            {
+                return _fullField;
+            }
+
+            set
+            {
+                _fullField = value;
+            }
+        }
+
         private MPCLSPPlant(MPCLSPPlant instance)
         {
             UID = instance.UID;
@@ -160,6 +236,11 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
             ProcessingTimes = instance.ProcessingTimes;
             TransferCost = instance.TransferCost;
             SetupTime = instance.SetupTime;
+            LeftCapacity = instance.LeftCapacity;
+
+            SetupWeghit = instance.SetupWeghit;
+            ProductionWeghit = instance.ProductionWeghit;
+
             Lines = new List<MPCLSPLine>();instance.Lines.ForEach(l => Lines.Add(l.Copy()));
             Products = new List<MPCLSPProduct>();instance.Products.ForEach(p => Products.Add(p.Copy()));
         }
@@ -175,6 +256,16 @@ namespace HeuristicStudio.Core.Model.DataStructure.MPCLSPData
             _setupTime = new Dictionary<int, int>();
             Products = new List<MPCLSPProduct>();
             _lines = lines;
+        }
+
+        public Tuple<double, int> MinSetupWeghit()
+        {
+            return SetupWeghit.Where(sw => sw.Item1 == SetupWeghit.Min(s => s.Item1)).FirstOrDefault();
+        }
+
+        public Tuple<double, int> MinProductionWeghit()
+        {
+            return ProductionWeghit.Where(sw => sw.Item1 == ProductionWeghit.Min(s => s.Item1)).FirstOrDefault();
         }
 
         public MPCLSPPlant Copy()
